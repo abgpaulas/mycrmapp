@@ -58,13 +58,8 @@ class UserRegistrationForm(BaseUserCreationForm):
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        try:
-            if User.objects.filter(email=email).exists():
-                raise ValidationError("A user with this email already exists.")
-        except Exception:
-            # Database tables don't exist yet (during migrations)
-            # Skip email validation for now
-            pass
+        if User.objects.filter(email=email).exists():
+            raise ValidationError("A user with this email already exists.")
         return email
 
     def clean_password1(self):

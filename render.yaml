@@ -1,10 +1,10 @@
-# Updated: 2025-09-23 - Force Render to use latest configuration
+# Updated: 2025-09-23 - Using SQLite database for simplicity
 services:
   - type: web
     name: mycrmapp
     env: python
     buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput"
-    startCommand: "python manage.py migrate --noinput && python manage.py create_admin_user && gunicorn business_app.wsgi:application --bind 0.0.0.0:$PORT"
+    startCommand: "python manage.py migrate --noinput && gunicorn business_app.wsgi:application --bind 0.0.0.0:$PORT"
     envVars:
       - key: SECRET_KEY
         generateValue: true
@@ -14,13 +14,5 @@ services:
         value: "False"
       - key: PYTHON_VERSION
         value: "3.11.0"
-      - key: DATABASE_URL
-        fromDatabase:
-          name: mycrmapp-db
-          property: connectionString
     healthCheckPath: "/dashboard/landing/"
-    plan: free
-
-databases:
-  - name: mycrmapp-db
     plan: free
