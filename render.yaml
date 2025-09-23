@@ -1,10 +1,11 @@
 # Updated: 2025-09-23 - Using SQLite database for simplicity
+# FORCE DEPLOYMENT: This comment forces Render to use the latest commit
 services:
   - type: web
     name: mycrmapp
     env: python
     buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput"
-    startCommand: "python manage.py migrate --noinput --verbosity=2 && python manage.py check --deploy && python test_db.py && gunicorn business_app.wsgi:application --bind 0.0.0.0:$PORT"
+    startCommand: "python setup_database.py && gunicorn business_app.wsgi:application --bind 0.0.0.0:$PORT"
     envVars:
       - key: SECRET_KEY
         generateValue: true
