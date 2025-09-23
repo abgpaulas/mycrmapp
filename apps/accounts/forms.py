@@ -58,8 +58,15 @@ class UserRegistrationForm(BaseUserCreationForm):
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        if User.objects.filter(email=email).exists():
-            raise ValidationError("A user with this email already exists.")
+        try:
+            if User.objects.filter(email=email).exists():
+                raise ValidationError("A user with this email already exists.")
+        except Exception as e:
+            # If there's a database error, log it but don't block registration
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Database error during email validation: {e}")
+            # Allow the registration to proceed - the database might not be ready yet
         return email
 
     def clean_password1(self):

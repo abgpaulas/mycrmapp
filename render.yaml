@@ -4,7 +4,7 @@ services:
     name: mycrmapp
     env: python
     buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput"
-    startCommand: "python manage.py migrate --noinput && gunicorn business_app.wsgi:application --bind 0.0.0.0:$PORT"
+    startCommand: "python manage.py migrate --noinput --verbosity=2 && python manage.py check --deploy && python test_db.py && gunicorn business_app.wsgi:application --bind 0.0.0.0:$PORT"
     envVars:
       - key: SECRET_KEY
         generateValue: true

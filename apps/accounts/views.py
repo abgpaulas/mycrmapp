@@ -70,12 +70,19 @@ class RegisterView(CreateView):
     success_url = reverse_lazy('accounts:login')
 
     def form_valid(self, form):
-        user = form.save()
-        messages.success(
-            self.request,
-            f'Account created successfully for {user.email}. You can now log in.'
-        )
-        return super().form_valid(form)
+        try:
+            user = form.save()
+            messages.success(
+                self.request,
+                f'Account created successfully for {user.email}. You can now log in.'
+            )
+            return super().form_valid(form)
+        except Exception as e:
+            messages.error(
+                self.request,
+                f'Error creating account: {str(e)}. Please try again or contact support.'
+            )
+            return self.form_invalid(form)
 
     def form_invalid(self, form):
         messages.error(self.request, 'Please correct the errors below.')
