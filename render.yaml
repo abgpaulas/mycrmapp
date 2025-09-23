@@ -1,3 +1,4 @@
+# Updated: 2025-09-23 - Force Render to use latest configuration
 services:
   - type: web
     name: mycrmapp
