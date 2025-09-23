@@ -1,0 +1,316 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ company.name }} - Company Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Company Header -->
+            <div class="card my-4">
+                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                    <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="text-white text-capitalize ps-3">{{ company.name }}</h6>
+                            <div class="pe-3">
+                                <a href="{% url 'company_management:company_edit' company.pk %}" 
+                                   class="btn btn-light btn-sm">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a href="{% url 'company_management:company_list' %}" 
+                                   class="btn btn-outline-light btn-sm">
+                                    <i class="fas fa-arrow-left"></i> Back to List
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-sm font-weight-bold mb-2">Company Information</h6>
+                                    <p class="text-sm mb-1"><strong>Name:</strong> {{ company.name }}</p>
+                                    <p class="text-sm mb-1"><strong>Email:</strong> {{ company.email }}</p>
+                                    <p class="text-sm mb-1"><strong>Phone:</strong> {{ company.phone }}</p>
+                                    <p class="text-sm mb-1"><strong>Website:</strong> 
+                                        {% if company.website %}
+                                            <a href="{{ company.website }}" target="_blank">{{ company.website }}</a>
+                                        {% else %}
+                                            Not provided
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-sm font-weight-bold mb-2">Business Details</h6>
+                                    <p class="text-sm mb-1"><strong>Registration Number:</strong> 
+                                        {{ company.registration_number|default:"Not provided" }}</p>
+                                    <p class="text-sm mb-1"><strong>Tax ID:</strong> 
+                                        {{ company.tax_id|default:"Not provided" }}</p>
+                                    <p class="text-sm mb-1"><strong>Industry:</strong> 
+                                        {{ company.industry|default:"Not specified" }}</p>
+                                    <p class="text-sm mb-1"><strong>Status:</strong> 
+                                        {% if company.status == 'active' %}
+                                            <span class="badge badge-sm bg-gradient-success">{{ company.get_status_display }}</span>
+                                        {% elif company.status == 'pending' %}
+                                            <span class="badge badge-sm bg-gradient-warning">{{ company.get_status_display }}</span>
+                                        {% elif company.status == 'suspended' %}
+                                            <span class="badge badge-sm bg-gradient-danger">{{ company.get_status_display }}</span>
+                                        {% else %}
+                                            <span class="badge badge-sm bg-gradient-secondary">{{ company.get_status_display }}</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <h6 class="text-sm font-weight-bold mb-2">Address</h6>
+                                    <p class="text-sm">{{ company.address }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-gradient-info">
+                                <div class="card-body text-center">
+                                    <h6 class="text-white">Total Users</h6>
+                                    <h2 class="text-white">{{ company_users.count }}</h2>
+                                </div>
+                            </div>
+                            <div class="card bg-gradient-success mt-3">
+                                <div class="card-body text-center">
+                                    <h6 class="text-white">Created</h6>
+                                    <p class="text-white">{{ company.created_at|date:"M d, Y" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Company Users Section -->
+            <div class="card my-4">
+                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                    <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="text-white text-capitalize ps-3">Company Users</h6>
+                            <div class="pe-3">
+                                <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#assignUserModal">
+                                    <i class="fas fa-user-plus"></i> Assign User
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body px-0 pb-2">
+                    <div class="table-responsive p-0">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">User</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Role</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Assigned</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Primary</th>
+                                    <th class="text-secondary opacity-7">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for company_user in company_users %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex px-2 py-1">
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">{{ company_user.user.get_full_name }}</h6>
+                                                <p class="text-xs text-secondary mb-0">{{ company_user.user.email }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <p class="text-xs font-weight-bold mb-0">{{ company_user.role.name }}</p>
+                                        <p class="text-xs text-secondary mb-0">{{ company_user.role.get_role_type_display }}</p>
+                                    </td>
+                                    <td class="align-middle text-center text-sm">
+                                        {% if company_user.is_active %}
+                                            <span class="badge badge-sm bg-gradient-success">Active</span>
+                                        {% else %}
+                                            <span class="badge badge-sm bg-gradient-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        <span class="text-secondary text-xs font-weight-bold">{{ company_user.assigned_at|date:"M d, Y" }}</span>
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        {% if company_user.is_primary %}
+                                            <i class="fas fa-check text-success"></i>
+                                        {% else %}
+                                            <i class="fas fa-times text-secondary"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td class="align-middle">
+                                        {% if company_user.is_active %}
+                                            <a href="{% url 'company_management:company_user_remove' company_user.pk %}" 
+                                               class="text-danger font-weight-bold text-xs" 
+                                               onclick="return confirm('Are you sure you want to remove this user from the company?')">
+                                                <i class="fas fa-user-minus"></i>
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-4">
+                                        <p class="text-muted">No users assigned to this company.</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assign User Modal -->
+<div class="modal fade" id="assignUserModal" tabindex="-1" aria-labelledby="assignUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignUserModalLabel">Assign User to {{ company.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="assignUserForm">
+                <div class="modal-body">
+                    <input type="hidden" name="company" value="{{ company.id }}">
+                    <div class="form-group">
+                        <label for="user_select" class="form-label">User *</label>
+                        <select class="form-control" id="user_select" name="user" required>
+                            <option value="">Select a user...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="role_select" class="form-label">Role *</label>
+                        <select class="form-control" id="role_select" name="role" required>
+                            <option value="">Select a role...</option>
+                        </select>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="is_primary" name="is_primary">
+                        <label class="form-check-label" for="is_primary">
+                            Primary Contact
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Assign User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load roles and users when page loads
+    loadRoles();
+    loadUsers({{ company.id }});
+    
+    // Assign user form submission
+    document.getElementById('assignUserForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        assignUser();
+    });
+});
+
+function loadRoles() {
+    fetch('{% url "company_management:ajax_get_roles" %}')
+        .then(response => response.json())
+        .then(data => {
+            const roleSelect = document.getElementById('role_select');
+            roleSelect.innerHTML = '<option value="">Select a role...</option>';
+            data.roles.forEach(role => {
+                const option = document.createElement('option');
+                option.value = role.id;
+                option.textContent = role.name;
+                roleSelect.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error loading roles:', error));
+}
+
+function loadUsers(companyId) {
+    fetch(`{% url "company_management:ajax_get_users" %}?company_id=${companyId}`)
+        .then(response => response.json())
+        .then(data => {
+            const userSelect = document.getElementById('user_select');
+            userSelect.innerHTML = '<option value="">Select a user...</option>';
+            data.users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = `${user.first_name} ${user.last_name} (${user.email})`;
+                userSelect.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error loading users:', error));
+}
+
+function assignUser() {
+    const form = document.getElementById('assignUserForm');
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    
+    fetch('{% url "company_management:ajax_company_user_assign" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            showAlert('success', data.message);
+            // Close modal
+            bootstrap.Modal.getInstance(document.getElementById('assignUserModal')).hide();
+            // Reload page to show new user
+            location.reload();
+        } else {
+            // Show error messages
+            showAlert('error', 'Please fix the errors below:');
+            console.error('Validation errors:', data.errors);
+        }
+    })
+    .catch(error => {
+        console.error('Error assigning user:', error);
+        showAlert('error', 'An error occurred while assigning the user.');
+    });
+}
+
+function showAlert(type, message) {
+    // Create alert element
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    // Insert at the top of the content
+    const container = document.querySelector('.container-fluid');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

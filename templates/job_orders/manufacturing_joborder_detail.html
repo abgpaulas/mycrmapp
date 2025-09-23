@@ -1,0 +1,434 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manufacturing Job Order - {{ joborder.job_order }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-industry me-2"></i>Manufacturing Job Order: {{ joborder.job_order }}
+                    </h4>
+                    <div class="d-flex gap-2">
+                        {% if joborder.is_editable %}
+                        <a href="{% url 'job_orders:manufacturing_joborder_edit' joborder.pk %}" class="btn btn-warning">
+                            <i class="fas fa-edit me-1"></i>Edit
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'job_orders:manufacturing_joborder_print' joborder.pk %}" class="btn btn-info">
+                            <i class="fas fa-print me-1"></i>Print
+                        </a>
+                        <a href="{% url 'job_orders:manufacturing_joborder_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Back to List
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Status Badge -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">{{ joborder.name|default:"Untitled Job Order" }}</h5>
+                                    <p class="text-muted mb-0">{{ joborder.job_title|default:"" }}</p>
+                                </div>
+                                <div class="text-end">
+                                    {% if joborder.status == 'draft' %}
+                                        <span class="badge bg-secondary fs-6">Draft</span>
+                                    {% elif joborder.status == 'submitted' %}
+                                        <span class="badge bg-info fs-6">Submitted</span>
+                                    {% elif joborder.status == 'pending' %}
+                                        <span class="badge bg-warning fs-6">Pending Approval</span>
+                                    {% elif joborder.status == 'approved' %}
+                                        <span class="badge bg-success fs-6">Approved</span>
+                                    {% elif joborder.status == 'rejected' %}
+                                        <span class="badge bg-danger fs-6">Rejected</span>
+                                    {% elif joborder.status == 'in_production' %}
+                                        <span class="badge bg-primary fs-6">In Production</span>
+                                    {% elif joborder.status == 'completed' %}
+                                        <span class="badge bg-success fs-6">Completed</span>
+                                    {% elif joborder.status == 'delivered' %}
+                                        <span class="badge bg-success fs-6">Delivered</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Basic Information -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Basic Information</h6>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td><strong>Job Order #:</strong></td>
+                                            <td>{{ joborder.job_order }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Submission ID:</strong></td>
+                                            <td>{{ joborder.submission_id|default:"-" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Category:</strong></td>
+                                            <td><span class="badge bg-info">{{ joborder.category|default:"-" }}</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Created:</strong></td>
+                                            <td>{{ joborder.date_created|date:"M d, Y H:i" }}</td>
+                                        </tr>
+                                        {% if joborder.created_by %}
+                                        <tr>
+                                            <td><strong>Created By:</strong></td>
+                                            <td>{{ joborder.created_by.get_full_name|default:joborder.created_by.email }}</td>
+                                        </tr>
+                                        {% endif %}
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Customer Information -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="fas fa-building me-2"></i>Customer Information</h6>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td><strong>Organization:</strong></td>
+                                            <td>{{ joborder.organization_name|default:"-" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Contact:</strong></td>
+                                            <td>{{ joborder.contact_number|default:"-" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Address:</strong></td>
+                                            <td>{{ joborder.address|default:"-"|linebreaks }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <!-- Manufacturing Details -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="fas fa-cogs me-2"></i>Manufacturing Details</h6>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td><strong>Treatment:</strong></td>
+                                            <td>{{ joborder.treatment|default:"-" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Cutting Length:</strong></td>
+                                            <td>{{ joborder.cutting_length|default:"-" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Flap:</strong></td>
+                                            <td>{{ joborder.flap|default:"-" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Printing:</strong></td>
+                                            <td>{{ joborder.printing|default:"-" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Product:</strong></td>
+                                            <td>{{ joborder.print_product|default:"-" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Colors:</strong></td>
+                                            <td>{{ joborder.colors|default:"-" }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Details -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="fas fa-tools me-2"></i>Additional Details</h6>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td><strong>Size:</strong></td>
+                                            <td>{{ joborder.size|default:"-" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Micron:</strong></td>
+                                            <td>{{ joborder.micron|default:"-" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Order Info:</strong></td>
+                                            <td>{{ joborder.order_info|default:"-"|linebreaks }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Est. Delivery:</strong></td>
+                                            <td>
+                                                {% if joborder.estimated_delivery_date %}
+                                                    {{ joborder.estimated_delivery_date|date:"M d, Y" }}
+                                                    {% if joborder.is_overdue %}
+                                                        <span class="badge bg-danger ms-2">Overdue</span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <!-- Pricing & Quantity -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="fas fa-dollar-sign me-2"></i>Pricing & Quantity</h6>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td><strong>Unit Price:</strong></td>
+                                            <td>{{ currency_symbol }}{{ joborder.price|default:"0.00" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Quantity:</strong></td>
+                                            <td>{{ joborder.quantity|default:"-" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Order Quantity:</strong></td>
+                                            <td>{{ joborder.order_quantity|default:"-" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Total:</strong></td>
+                                            <td><strong>{{ currency_symbol }}{{ joborder.total|default:"0.00" }}</strong></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Production Status -->
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="fas fa-industry me-2"></i>Production Status</h6>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td><strong>Status:</strong></td>
+                                            <td>
+                                                {% if joborder.status == 'draft' %}
+                                                    <span class="badge bg-secondary">Draft</span>
+                                                {% elif joborder.status == 'submitted' %}
+                                                    <span class="badge bg-info">Submitted</span>
+                                                {% elif joborder.status == 'pending' %}
+                                                    <span class="badge bg-warning">Pending Approval</span>
+                                                {% elif joborder.status == 'approved' %}
+                                                    <span class="badge bg-success">Approved</span>
+                                                {% elif joborder.status == 'rejected' %}
+                                                    <span class="badge bg-danger">Rejected</span>
+                                                {% elif joborder.status == 'in_production' %}
+                                                    <span class="badge bg-primary">In Production</span>
+                                                {% elif joborder.status == 'completed' %}
+                                                    <span class="badge bg-success">Completed</span>
+                                                {% elif joborder.status == 'delivered' %}
+                                                    <span class="badge bg-success">Delivered</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Production Status:</strong></td>
+                                            <td>{{ joborder.production_status|default:"-"|linebreaks }}</td>
+                                        </tr>
+                                        {% if joborder.approved_by %}
+                                        <tr>
+                                            <td><strong>Approved By:</strong></td>
+                                            <td>{{ joborder.approved_by.get_full_name|default:joborder.approved_by.email }}</td>
+                                        </tr>
+                                        {% endif %}
+                                        {% if joborder.approved_at %}
+                                        <tr>
+                                            <td><strong>Approved At:</strong></td>
+                                            <td>{{ joborder.approved_at|date:"M d, Y H:i" }}</td>
+                                        </tr>
+                                        {% endif %}
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Image Section -->
+                    {% if joborder.image %}
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="fas fa-image me-2"></i>Job Order Image</h6>
+                                </div>
+                                <div class="card-body text-center">
+                                    <img src="{{ joborder.image.url }}" alt="Job Order Image" class="img-fluid" style="max-height: 300px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Action Buttons -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="fas fa-cogs me-2"></i>Actions</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        {% if joborder.status == 'draft' %}
+                                        <a href="{% url 'job_orders:manufacturing_joborder_submit' joborder.pk %}" class="btn btn-primary">
+                                            <i class="fas fa-paper-plane me-1"></i>Submit for Approval
+                                        </a>
+                                        {% endif %}
+                                        
+                                        {% if joborder.status == 'pending' and user.has_perm 'job_orders.can_approve_manufacturing_jobs' %}
+                                        <a href="{% url 'job_orders:manufacturing_joborder_approve' joborder.pk %}" class="btn btn-success">
+                                            <i class="fas fa-check me-1"></i>Approve
+                                        </a>
+                                        <a href="{% url 'job_orders:manufacturing_joborder_reject' joborder.pk %}" class="btn btn-danger">
+                                            <i class="fas fa-times me-1"></i>Reject
+                                        </a>
+                                        {% endif %}
+                                        
+                                        {% if joborder.status == 'approved' %}
+                                        <button class="btn btn-primary" onclick="setStatus('in_production')">
+                                            <i class="fas fa-play me-1"></i>Start Production
+                                        </button>
+                                        {% endif %}
+                                        
+                                        {% if joborder.status == 'in_production' %}
+                                        <button class="btn btn-success" onclick="setStatus('completed')">
+                                            <i class="fas fa-check-double me-1"></i>Mark Complete
+                                        </button>
+                                        {% endif %}
+                                        
+                                        {% if joborder.status == 'completed' %}
+                                        <button class="btn btn-success" onclick="setStatus('delivered')">
+                                            <i class="fas fa-truck me-1"></i>Mark Delivered
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comments Section -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0"><i class="fas fa-comments me-2"></i>Comments</h6>
+                                </div>
+                                <div class="card-body">
+                                    {% if comments %}
+                                    <div class="mb-3">
+                                        {% for comment in comments %}
+                                        <div class="border-bottom pb-3 mb-3">
+                                            <div class="d-flex justify-content-between">
+                                                <strong>{{ comment.user.get_full_name|default:comment.user.email }}</strong>
+                                                <small class="text-muted">{{ comment.created_at|date:"M d, Y H:i" }}</small>
+                                            </div>
+                                            <p class="mb-0 mt-1">{{ comment.comment }}</p>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <form method="post" action="{% url 'job_orders:manufacturing_joborder_comment' joborder.pk %}">
+                                        {% csrf_token %}
+                                        <div class="mb-3">
+                                            {{ comment_form.comment }}
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-comment me-1"></i>Add Comment
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function setStatus(status) {
+    if (confirm('Are you sure you want to change the status to ' + status + '?')) {
+        fetch(`{% url 'job_orders:manufacturing_joborder_set_status' joborder.pk %}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({status: status})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while updating the status.');
+        });
+    }
+}
+</script>
+
+<style>
+.card {
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.table td {
+    padding: 0.5rem 0;
+    vertical-align: top;
+}
+
+.badge {
+    font-size: 0.875em;
+}
+</style>
+{% endblock %}

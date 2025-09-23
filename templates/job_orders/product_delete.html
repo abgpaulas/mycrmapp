@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Delete Product{% endblock %}
+
+{% block content %}
+{% include 'partials/topside.html' %}
+
+<div class="row my-4">
+    <div class="col-md-6 mx-auto">
+        <div class="card card-body">
+            <h5>Delete Job Order</h5>
+            <hr>
+            
+            <p>Are you sure you want to delete the job order <strong>{{ product.job_order }}</strong>?</p>
+            
+            <div class="alert alert-warning">
+                <strong>Warning:</strong> This action cannot be undone. All associated data will be permanently deleted.
+            </div>
+            
+            <div class="row mt-3">
+                <div class="col-6">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-block">
+                            <i class="fas fa-trash"></i> Confirm Delete
+                        </button>
+                    </form>
+                </div>
+                <div class="col-6">
+                    <a href="{% url 'job_orders:product_detail' product.id %}" class="btn btn-secondary btn-block">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

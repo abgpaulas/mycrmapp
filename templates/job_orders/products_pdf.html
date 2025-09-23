@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Orders Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            margin: 20px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #2c3e50;
+        }
+        .header p {
+            margin: 5px 0;
+            color: #666;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 8px;
+            table-layout: fixed;
+            page-break-inside: auto;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 4px 6px;
+            text-align: left;
+            vertical-align: top;
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+            hyphens: auto;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 8px;
+            text-align: center;
+            height: 25px;
+        }
+        td {
+            height: 30px;
+            line-height: 1.2;
+        }
+        /* Column widths - more reasonable sizes */
+        th:nth-child(1), td:nth-child(1) { width: 30px; } /* S/N */
+        th:nth-child(2), td:nth-child(2) { width: 60px; } /* Date */
+        th:nth-child(3), td:nth-child(3) { width: 70px; } /* Job Order */
+        th:nth-child(4), td:nth-child(4) { width: 80px; } /* Job Name */
+        th:nth-child(5), td:nth-child(5) { width: 70px; } /* Customer */
+        th:nth-child(6), td:nth-child(6) { width: 60px; } /* Contact */
+        th:nth-child(7), td:nth-child(7) { width: 100px; } /* Product */
+        th:nth-child(8), td:nth-child(8) { width: 50px; } /* Colors */
+        th:nth-child(9), td:nth-child(9) { width: 60px; } /* Treatment */
+        th:nth-child(10), td:nth-child(10) { width: 60px; } /* Cutting */
+        th:nth-child(11), td:nth-child(11) { width: 40px; } /* Flap */
+        th:nth-child(12), td:nth-child(12) { width: 40px; } /* Size */
+        th:nth-child(13), td:nth-child(13) { width: 60px; } /* Price */
+        th:nth-child(14), td:nth-child(14) { width: 50px; } /* Ext. Qty */
+        th:nth-child(15), td:nth-child(15) { width: 50px; } /* Del. Qty */
+        th:nth-child(16), td:nth-child(16) { width: 60px; } /* Total */
+        th:nth-child(17), td:nth-child(17) { width: 60px; } /* Est. Del. */
+        th:nth-child(18), td:nth-child(18) { width: 60px; } /* Act. Del. */
+        th:nth-child(19), td:nth-child(19) { width: 50px; } /* Cycle */
+        th:nth-child(20), td:nth-child(20) { width: 70px; } /* Sub. ID */
+        th:nth-child(21), td:nth-child(21) { width: 50px; } /* Status */
+        th:nth-child(22), td:nth-child(22) { width: 70px; } /* Created */
+        th:nth-child(23), td:nth-child(23) { width: 70px; } /* Approved */
+        th:nth-child(24), td:nth-child(24) { width: 80px; } /* Production */
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .status-pending {
+            color: #f39c12;
+            font-weight: bold;
+        }
+        .status-approved {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .status-rejected {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .text-center {
+            text-align: center;
+        }
+        /* Ensure all cells display content properly */
+        td {
+            box-sizing: border-box;
+            display: table-cell;
+            vertical-align: top;
+        }
+        /* Handle long text in specific columns */
+        td:nth-child(7) { /* Product column */
+            font-size: 7px;
+            line-height: 1.1;
+        }
+        td:nth-child(24) { /* Production Status column */
+            font-size: 7px;
+            line-height: 1.1;
+        }
+        /* Ensure table doesn't exceed page width */
+        @media print {
+            table {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            body {
+                margin: 0;
+                padding: 10px;
+            }
+        }
+        .summary {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+        }
+        .summary h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .no-data {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 40px;
+        }
+        @media print {
+            body { margin: 0; }
+            .header { page-break-after: avoid; }
+            table { page-break-inside: auto; }
+            tr { page-break-inside: avoid; page-break-after: auto; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Job Orders Report</h1>
+        <p>Generated on: {{ "now"|date:"F d, Y \a\t g:i A" }}</p>
+        <p>Total Records: {{ products|length }}</p>
+    </div>
+
+    {% if products %}
+        <table>
+            <thead>
+                <tr>
+                    <th>S/N</th>
+                    <th>Date</th>
+                    <th>Job Order</th>
+                    <th>Job Name</th>
+                    <th>Customer</th>
+                    <th>Contact</th>
+                    <th>Product</th>
+                    <th>Colors</th>
+                    <th>Treatment</th>
+                    <th>Cutting</th>
+                    <th>Flap</th>
+                    <th>Size</th>
+                    <th>Price ({{ currency_symbol }})</th>
+                    <th>Ext. Qty</th>
+                    <th>Del. Qty</th>
+                    <th>Total ({{ currency_symbol }})</th>
+                    <th>Est. Del.</th>
+                    <th>Act. Del.</th>
+                    <th>Cycle</th>
+                    <th>Sub. ID</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Approved</th>
+                    <th>Production</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td class="text-center">{{ forloop.counter }}</td>
+                    <td>{{ product.date_created|date:"M d, Y" }}</td>
+                    <td><strong>{{ product.job_order }}</strong></td>
+                    <td>{{ product.job_title|truncatechars:15|default:"-" }}</td>
+                    <td>{{ product.organization_name|truncatechars:15|default:"-" }}</td>
+                    <td>{{ product.contact_number|truncatechars:12|default:"-" }}</td>
+                    <td>{{ product.print_product|truncatechars:20|default:"-" }}</td>
+                    <td>{{ product.colors|truncatechars:10|default:"-" }}</td>
+                    <td>{{ product.treatment|truncatechars:12|default:"-" }}</td>
+                    <td>{{ product.cutting_length|truncatechars:12|default:"-" }}</td>
+                    <td>{{ product.flap|truncatechars:8|default:"-" }}</td>
+                    <td>{{ product.size|truncatechars:8|default:"-" }}</td>
+                    <td class="text-right">{{ product.price|floatformat:2|default:"0.00" }}</td>
+                    <td class="text-center">{{ product.quantity|default:"-" }}</td>
+                    <td class="text-center">{{ product.order_quantity|default:"-" }}</td>
+                    <td class="text-right"><strong>{{ product.total|floatformat:2|default:"0.00" }}</strong></td>
+                    <td>{{ product.estimated_delivery_date|date:"M d, Y"|default:"-" }}</td>
+                    <td>{{ product.actual_delivery_date|date:"M d, Y"|default:"-" }}</td>
+                    <td>{{ product.cycle_time|default:"-" }}</td>
+                    <td>{{ product.submission_id|truncatechars:12|default:"-" }}</td>
+                    <td class="text-center">
+                        <span class="status-{{ product.approval_status }}">
+                            {{ product.get_approval_status_display|truncatechars:10 }}
+                        </span>
+                    </td>
+                    <td>{{ product.created_by.get_full_name|default:product.created_by.email|truncatechars:12|default:"-" }}</td>
+                    <td>{{ product.approved_by.get_full_name|default:product.approved_by.email|truncatechars:12|default:"-" }}</td>
+                    <td>{{ product.production_status|truncatechars:15|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="summary">
+            <h3>Summary</h3>
+            <p><strong>Total Products:</strong> {{ products|length }}</p>
+            <p><strong>Pending:</strong> {{ pending_count|default:0 }}</p>
+            <p><strong>Approved:</strong> {{ approved_count|default:0 }}</p>
+            <p><strong>Rejected:</strong> {{ rejected_count|default:0 }}</p>
+            <p><strong>Total Value:</strong> {{ currency_symbol }}{{ total_value|floatformat:2|default:"0.00" }}</p>
+        </div>
+    {% else %}
+        <div class="no-data">
+            <h3>No Job Orders Found</h3>
+            <p>There are no job orders to display in this report.</p>
+        </div>
+    {% endif %}
+</body>
+</html>

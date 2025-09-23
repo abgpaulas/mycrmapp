@@ -1,0 +1,219 @@
+{% extends 'base_print.html' %}
+{% load static %}
+
+{% block title %}Manufacturing Job Order - {{ joborder.job_order }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center mb-4">
+                <h2>Manufacturing Job Order</h2>
+                <h4 class="text-muted">{{ joborder.job_order }}</h4>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Basic Information</h5>
+                    <table class="table table-borderless">
+                        <tr>
+                            <td><strong>Job Order #:</strong></td>
+                            <td>{{ joborder.job_order }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Submission ID:</strong></td>
+                            <td>{{ joborder.submission_id|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Name:</strong></td>
+                            <td>{{ joborder.name|default:"Untitled" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Category:</strong></td>
+                            <td>{{ joborder.category|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Job Title:</strong></td>
+                            <td>{{ joborder.job_title|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Created:</strong></td>
+                            <td>{{ joborder.date_created|date:"M d, Y H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Status:</strong></td>
+                            <td>
+                                {% if joborder.status == 'draft' %}
+                                    Draft
+                                {% elif joborder.status == 'submitted' %}
+                                    Submitted
+                                {% elif joborder.status == 'pending' %}
+                                    Pending Approval
+                                {% elif joborder.status == 'approved' %}
+                                    Approved
+                                {% elif joborder.status == 'rejected' %}
+                                    Rejected
+                                {% elif joborder.status == 'in_production' %}
+                                    In Production
+                                {% elif joborder.status == 'completed' %}
+                                    Completed
+                                {% elif joborder.status == 'delivered' %}
+                                    Delivered
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="col-md-6">
+                    <h5>Customer Information</h5>
+                    <table class="table table-borderless">
+                        <tr>
+                            <td><strong>Organization:</strong></td>
+                            <td>{{ joborder.organization_name|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Contact:</strong></td>
+                            <td>{{ joborder.contact_number|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Address:</strong></td>
+                            <td>{{ joborder.address|default:"-"|linebreaks }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Manufacturing Details</h5>
+                    <table class="table table-borderless">
+                        <tr>
+                            <td><strong>Treatment:</strong></td>
+                            <td>{{ joborder.treatment|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cutting Length:</strong></td>
+                            <td>{{ joborder.cutting_length|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Flap:</strong></td>
+                            <td>{{ joborder.flap|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Printing:</strong></td>
+                            <td>{{ joborder.printing|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Product:</strong></td>
+                            <td>{{ joborder.print_product|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Colors:</strong></td>
+                            <td>{{ joborder.colors|default:"-" }}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="col-md-6">
+                    <h5>Additional Details</h5>
+                    <table class="table table-borderless">
+                        <tr>
+                            <td><strong>Size:</strong></td>
+                            <td>{{ joborder.size|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Micron:</strong></td>
+                            <td>{{ joborder.micron|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Order Info:</strong></td>
+                            <td>{{ joborder.order_info|default:"-"|linebreaks }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Est. Delivery:</strong></td>
+                            <td>{{ joborder.estimated_delivery_date|date:"M d, Y"|default:"-" }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Pricing & Quantity</h5>
+                    <table class="table table-borderless">
+                        <tr>
+                            <td><strong>Unit Price:</strong></td>
+                            <td>{{ currency_symbol }}{{ joborder.price|default:"0.00" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Quantity:</strong></td>
+                            <td>{{ joborder.quantity|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Order Quantity:</strong></td>
+                            <td>{{ joborder.order_quantity|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Total:</strong></td>
+                            <td><strong>{{ currency_symbol }}{{ joborder.total|default:"0.00" }}</strong></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="col-md-6">
+                    <h5>Production Status</h5>
+                    <table class="table table-borderless">
+                        <tr>
+                            <td><strong>Production Status:</strong></td>
+                            <td>{{ joborder.production_status|default:"-"|linebreaks }}</td>
+                        </tr>
+                        {% if joborder.approved_by %}
+                        <tr>
+                            <td><strong>Approved By:</strong></td>
+                            <td>{{ joborder.approved_by.get_full_name|default:joborder.approved_by.email }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if joborder.approved_at %}
+                        <tr>
+                            <td><strong>Approved At:</strong></td>
+                            <td>{{ joborder.approved_at|date:"M d, Y H:i" }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <p class="text-muted">
+                    <small>Printed on {{ "now"|date:"M d, Y H:i" }}</small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .table td {
+        padding: 0.25rem 0;
+    }
+    
+    h5 {
+        color: #333;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 0.5rem;
+        margin-top: 1.5rem;
+    }
+    
+    hr {
+        border-color: #ddd;
+        margin: 1.5rem 0;
+    }
+}
+</style>
+{% endblock %}

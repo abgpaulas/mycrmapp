@@ -1,0 +1,10 @@
+{% if show %}
+<li class="nav-item">
+  <a class="nav-link text-white {% if menu_item.active_condition %}active bg-gradient-primary{% endif %}" href="{{ menu_item.url }}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="{{ menu_item.icon }}">{{ menu_item.icon }}</i>
+    </div>
+    <span class="nav-link-text ms-1">{{ menu_item.title }}</span>
+  </a>
+</li>
+{% endif %}

@@ -1,0 +1,478 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Role Management{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/material-dashboard.css' %}" rel="stylesheet" />
+<style>
+    .role-card {
+        transition: transform 0.2s;
+        border-left: 4px solid #e91e63;
+    }
+    .role-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .role-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    .search-box {
+        position: relative;
+    }
+    .search-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+    }
+    .search-result-item {
+        padding: 10px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+    }
+    .search-result-item:hover {
+        background-color: #f5f5f5;
+    }
+    .permission-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+    }
+    .permission-granted { background-color: #4caf50; }
+    .permission-denied { background-color: #f44336; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Role Management</h6>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#assignRoleModal">
+                                <i class="fas fa-plus"></i> Assign Role
+                            </button>
+                            <a href="{% url 'rbac:role_list' %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-list"></i> View All Roles
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body px-0 pt-0 pb-2">
+                    <!-- Search and Filter Section -->
+                    <div class="px-4 py-3 border-bottom">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="search-box">
+                                    <input type="text" id="userSearch" class="form-control" placeholder="Search users by name or email...">
+                                    <div id="searchResults" class="search-results"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <select id="roleFilter" class="form-select">
+                                    <option value="">All Roles</option>
+                                    {% for role in available_roles %}
+                                    <option value="{{ role.role_type }}">{{ role.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select id="statusFilter" class="form-select">
+                                    <option value="">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="expired">Expired</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Roles Table -->
+                    <div class="table-responsive p-0">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">User</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Role</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Assigned By</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Assigned Date</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userRolesTableBody">
+                                {% for user_role in page_obj %}
+                                <tr data-role="{{ user_role.role.role_type }}" data-status="{% if user_role.is_expired %}expired{% else %}active{% endif %}">
+                                    <td>
+                                        <div class="d-flex px-2 py-1">
+                                            <div>
+                                                {% if user_role.user.profile_picture %}
+                                                <img src="{{ user_role.user.profile_picture.url }}" class="user-avatar me-3" alt="user avatar">
+                                                {% else %}
+                                                <div class="user-avatar me-3 bg-gradient-primary d-flex align-items-center justify-content-center text-white">
+                                                    {{ user_role.user.first_name|first }}{{ user_role.user.last_name|first }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">{{ user_role.user.get_full_name }}</h6>
+                                                <p class="text-xs text-secondary mb-0">{{ user_role.user.email }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge role-badge bg-gradient-{{ user_role.role.role_type|default:'primary' }}">
+                                            {{ user_role.role.name }}
+                                        </span>
+                                    </td>
+                                    <td class="align-middle text-center text-sm">
+                                        {% if user_role.assigned_by %}
+                                        {{ user_role.assigned_by.get_full_name }}
+                                        {% else %}
+                                        <span class="text-muted">System</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        <span class="text-secondary text-xs font-weight-bold">{{ user_role.assigned_at|date:"M d, Y" }}</span>
+                                    </td>
+                                    <td class="align-middle text-center text-sm">
+                                        {% if user_role.is_expired %}
+                                        <span class="badge bg-gradient-danger">Expired</span>
+                                        {% elif user_role.is_active %}
+                                        <span class="badge bg-gradient-success">Active</span>
+                                        {% else %}
+                                        <span class="badge bg-gradient-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-outline-info btn-sm" onclick="viewUserPermissions({{ user_role.user.id }})">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            {% if user_role.is_active and not user_role.is_expired %}
+                                            <button type="button" class="btn btn-outline-warning btn-sm" onclick="revokeRole({{ user_role.id }})">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-4">
+                                        <div class="text-muted">
+                                            <i class="fas fa-users fa-3x mb-3"></i>
+                                            <p>No user roles found. Assign roles to get started.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                    <div class="d-flex justify-content-center mt-4">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination">
+                                {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                                </li>
+                                {% endif %}
+                                
+                                {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                                {% endif %}
+                                {% endfor %}
+                                
+                                {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assign Role Modal -->
+<div class="modal fade" id="assignRoleModal" tabindex="-1" aria-labelledby="assignRoleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignRoleModalLabel">Assign Role to User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="assignRoleForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="selectedUser" class="form-label">User</label>
+                        <input type="text" id="selectedUser" class="form-control" placeholder="Search and select a user..." readonly>
+                        <input type="hidden" id="selectedUserId" name="user_id">
+                    </div>
+                    <div class="mb-3">
+                        <label for="roleSelect" class="form-label">Role</label>
+                        <select id="roleSelect" name="role_id" class="form-select" required>
+                            <option value="">Select a role...</option>
+                            {% for role in available_roles %}
+                            <option value="{{ role.id }}" data-description="{{ role.description }}">
+                                {{ role.name }} - {{ role.description }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div id="roleDescription" class="form-text"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="expiresAt" class="form-label">Expires At (Optional)</label>
+                        <input type="datetime-local" id="expiresAt" name="expires_at" class="form-control">
+                        <div class="form-text">Leave blank for permanent assignment</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Assign Role
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- User Permissions Modal -->
+<div class="modal fade" id="userPermissionsModal" tabindex="-1" aria-labelledby="userPermissionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userPermissionsModalLabel">User Permissions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="userPermissionsContent">
+                <!-- Content will be loaded via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // User search functionality
+    const userSearch = document.getElementById('userSearch');
+    const searchResults = document.getElementById('searchResults');
+    const selectedUser = document.getElementById('selectedUser');
+    const selectedUserId = document.getElementById('selectedUserId');
+    
+    let searchTimeout;
+    
+    userSearch.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+        
+        if (query.length < 2) {
+            searchResults.style.display = 'none';
+            return;
+        }
+        
+        searchTimeout = setTimeout(() => {
+            fetch(`{% url 'rbac:search_users' %}?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    displaySearchResults(data.data);
+                })
+                .catch(error => {
+                    console.error('Error searching users:', error);
+                });
+        }, 300);
+    });
+    
+    function displaySearchResults(users) {
+        searchResults.innerHTML = '';
+        
+        if (users.length === 0) {
+            searchResults.innerHTML = '<div class="search-result-item text-muted">No users found</div>';
+        } else {
+            users.forEach(user => {
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                item.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <div class="bg-gradient-primary rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 32px; height: 32px;">
+                                ${user.name.charAt(0)}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="fw-bold">${user.name}</div>
+                            <small class="text-muted">${user.email}</small>
+                        </div>
+                    </div>
+                `;
+                item.addEventListener('click', () => {
+                    selectedUser.value = user.name;
+                    selectedUserId.value = user.id;
+                    searchResults.style.display = 'none';
+                    userSearch.value = '';
+                });
+                searchResults.appendChild(item);
+            });
+        }
+        
+        searchResults.style.display = 'block';
+    }
+    
+    // Hide search results when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!userSearch.contains(e.target) && !searchResults.contains(e.target)) {
+            searchResults.style.display = 'none';
+        }
+    });
+    
+    // Role description display
+    const roleSelect = document.getElementById('roleSelect');
+    const roleDescription = document.getElementById('roleDescription');
+    
+    roleSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const description = selectedOption.getAttribute('data-description');
+        
+        if (description) {
+            roleDescription.textContent = description;
+        } else {
+            roleDescription.textContent = '';
+        }
+    });
+    
+    // Form submission
+    document.getElementById('assignRoleForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        fetch('{% url "rbac:api_assign_role" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while assigning the role.');
+        });
+    });
+    
+    // Filter functionality
+    const roleFilter = document.getElementById('roleFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    
+    function filterTable() {
+        const roleValue = roleFilter.value;
+        const statusValue = statusFilter.value;
+        const rows = document.querySelectorAll('#userRolesTableBody tr');
+        
+        rows.forEach(row => {
+            const rowRole = row.getAttribute('data-role');
+            const rowStatus = row.getAttribute('data-status');
+            
+            let showRow = true;
+            
+            if (roleValue && rowRole !== roleValue) {
+                showRow = false;
+            }
+            
+            if (statusValue && rowStatus !== statusValue) {
+                showRow = false;
+            }
+            
+            row.style.display = showRow ? '' : 'none';
+        });
+    }
+    
+    roleFilter.addEventListener('change', filterTable);
+    statusFilter.addEventListener('change', filterTable);
+});
+
+function revokeRole(userRoleId) {
+    if (confirm('Are you sure you want to revoke this role?')) {
+        fetch(`{% url 'rbac:api_revoke_role' 0 %}`.replace('0', userRoleId), {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while revoking the role.');
+        });
+    }
+}
+
+function viewUserPermissions(userId) {
+    // This would load user permissions via AJAX
+    // For now, just show a placeholder
+    document.getElementById('userPermissionsContent').innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading user permissions...</p>
+        </div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('userPermissionsModal'));
+    modal.show();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manufacturing Job Orders Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+        }
+        .company-logo {
+            max-width: 150px;
+            max-height: 80px;
+        }
+        .company-info {
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            font-size: 12px;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .status-badge {
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .status-draft { background-color: #6c757d; color: white; }
+        .status-submitted { background-color: #17a2b8; color: white; }
+        .status-pending { background-color: #ffc107; color: black; }
+        .status-approved { background-color: #28a745; color: white; }
+        .status-rejected { background-color: #dc3545; color: white; }
+        .status-in_production { background-color: #007bff; color: white; }
+        .status-completed { background-color: #28a745; color: white; }
+        .status-delivered { background-color: #28a745; color: white; }
+        .overdue { background-color: #dc3545; color: white; }
+        .on-time { background-color: #28a745; color: white; }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        {% if company_logo_base64 %}
+        <img src="{{ company_logo_base64 }}" alt="Company Logo" class="company-logo">
+        {% endif %}
+        <h1>Manufacturing Job Orders Report</h1>
+        {% if company_profile %}
+        <p><strong>{{ company_profile.company_name }}</strong></p>
+        {% endif %}
+        <p>Generated on {{ "now"|date:"F d, Y" }}</p>
+    </div>
+
+    <div class="company-info">
+        {% if company_profile %}
+        <p><strong>Company:</strong> {{ company_profile.company_name }}</p>
+        <p><strong>Email:</strong> {{ company_profile.email }}</p>
+        <p><strong>Phone:</strong> {{ company_profile.phone }}</p>
+        <p><strong>Address:</strong> {{ company_profile.address }}</p>
+        {% endif %}
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Job Order #</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Organization</th>
+                <th>Status</th>
+                <th>Est. Delivery</th>
+                <th>Overdue</th>
+                <th>Created By</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for joborder in joborders %}
+            <tr>
+                <td>
+                    <strong>{{ joborder.job_order }}</strong>
+                    {% if joborder.submission_id %}
+                    <br><small>{{ joborder.submission_id }}</small>
+                    {% endif %}
+                </td>
+                <td>{{ joborder.name|default:"-" }}</td>
+                <td>{{ joborder.category|default:"-" }}</td>
+                <td>{{ joborder.organization_name|default:"-" }}</td>
+                <td>
+                    <span class="status-badge status-{{ joborder.status }}">
+                        {% if joborder.status == 'draft' %}
+                            Draft
+                        {% elif joborder.status == 'submitted' %}
+                            Submitted
+                        {% elif joborder.status == 'pending' %}
+                            Pending
+                        {% elif joborder.status == 'approved' %}
+                            Approved
+                        {% elif joborder.status == 'rejected' %}
+                            Rejected
+                        {% elif joborder.status == 'in_production' %}
+                            In Production
+                        {% elif joborder.status == 'completed' %}
+                            Completed
+                        {% elif joborder.status == 'delivered' %}
+                            Delivered
+                        {% endif %}
+                    </span>
+                </td>
+                <td>
+                    {% if joborder.estimated_delivery_date %}
+                        {{ joborder.estimated_delivery_date|date:"M d, Y" }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="status-badge {% if joborder.is_overdue %}overdue{% else %}on-time{% endif %}">
+                        {% if joborder.is_overdue %}Overdue{% else %}On Time{% endif %}
+                    </span>
+                </td>
+                <td>{{ joborder.created_by.get_full_name|default:joborder.created_by.email|default:"-" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p>Total Job Orders: {{ joborders|length }}</p>
+        <p>Report generated by {{ company_profile.company_name|default:"Business App" }}</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% block title %}Product Detail{% endblock %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+{% include 'partials/topside.html' %}
+
+<div class="row my-4">
+    <div class="col-md-8">
+        <div class="card card-body">
+            <h5>Product Details</h5>
+            <hr>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Job Order:</strong> {{ product.job_order }}</p>
+                    <p><strong>Submission ID:</strong> {{ product.submission_id }}</p>
+                    <p><strong>Organization:</strong> {{ product.organization_name }}</p>
+                    <p><strong>Address:</strong> {{ product.address }}</p>
+                    <p><strong>Contact:</strong> {{ product.contact_number }}</p>
+                    <p><strong>Category:</strong> {{ product.category }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Extrusion Quantity (kg):</strong> {{ product.job_title }}</p>
+                    <p><strong>Print Product:</strong> {{ product.print_product }}</p>
+                    <p><strong>Size:</strong> {{ product.size }}</p>
+                    <p><strong>Colors:</strong> {{ product.colors }}</p>
+                    <p><strong>Treatment:</strong> {{ product.treatment }}</p>
+                    <p><strong>Cutting Length:</strong> {{ product.cutting_length }}</p>
+                </div>
+            </div>
+            
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <p><strong>Flap:</strong> {{ product.flap }}</p>
+                    <p><strong>Printing:</strong> {{ product.printing }}</p>
+                    <p><strong>Micron:</strong> {{ product.micron }}</p>
+                    <p><strong>Quantity:</strong> {{ product.quantity }}</p>
+                    <p><strong>Price:</strong> {{ product.formatted_price }}</p>
+                    <p><strong>Delivery Quantity:</strong> {{ product.order_quantity }}</p>
+                    <p><strong>Total:</strong> {{ product.formatted_total }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Created By:</strong> {{ product.created_by.email }}</p>
+                    <p><strong>Created Date:</strong> {{ product.date_created|date:"Y-m-d H:i:s" }}</p>
+                    <p><strong>Approval Status:</strong> <span class="badge bg-{{ product.approval_status == 'approved' and 'success' or product.approval_status == 'rejected' and 'danger' or 'warning' }}" data-approval-status>{{ product.get_approval_status_display }}</span></p>
+                    {% if product.approved_by %}
+                        <p><strong>Approved By:</strong> <span data-approved-by>{{ product.approved_by.email }}</span></p>
+                    {% endif %}
+                    <p><strong>Estimated Delivery:</strong> {{ product.estimated_delivery_date|date:"Y-m-d"|default:"Not set" }}</p>
+                    <p><strong>Actual Delivery:</strong> {{ product.actual_delivery_date|date:"Y-m-d"|default:"Not set" }}</p>
+                </div>
+            </div>
+            
+            {% if product.order_info %}
+            <div class="row mt-3">
+                <div class="col-12">
+                    <p><strong>Order Information:</strong></p>
+                    <p>{{ product.order_info }}</p>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if product.production_status %}
+            <div class="row mt-3">
+                <div class="col-12">
+                    <p><strong>Production Status:</strong></p>
+                    <p>{{ product.production_status }}</p>
+                    <small class="text-muted">
+                        Last updated: {{ product.production_status_date|date:"Y-m-d H:i:s" }}
+                        {% if product.updated_by %}
+                            by {{ product.updated_by.email }}
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if product.image %}
+            <div class="row mt-3">
+                <div class="col-12">
+                    <p><strong>Product Image:</strong></p>
+                    <img src="{{ product.image.url }}" alt="Product Image" class="img-fluid" style="max-width: 300px;">
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="row mt-4">
+                <div class="col-12">
+                    <a href="{% url 'job_orders:product_edit' product.id %}" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="{% url 'job_orders:product_delete' product.id %}" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete
+                    </a>
+                    <a href="{% url 'job_orders:products' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card card-body">
+            <h5>Update Production Status</h5>
+            <hr>
+            
+            <form method="POST" action="{% url 'job_orders:update_production_status' %}">
+                {% csrf_token %}
+                <input type="hidden" name="product_id" value="{{ product.id }}">
+                <div class="form-group">
+                    <label for="new_status">New Status:</label>
+                    <textarea name="new_status" id="new_status" class="form-control" rows="3" placeholder="Enter production status..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-success btn-block mt-2">
+                    <i class="fas fa-save"></i> Update Status
+                </button>
+            </form>
+            
+            <hr>
+            
+            <h6>Status History</h6>
+            {% for history in product.status_history.all %}
+            <div class="border-bottom pb-2 mb-2">
+                <p class="mb-1"><strong>{{ history.status }}</strong></p>
+                <small class="text-muted">
+                    {{ history.created_at|date:"Y-m-d H:i:s" }}
+                    {% if history.updated_by %}
+                        by {{ history.updated_by.email }}
+                    {% endif %}
+                </small>
+            </div>
+            {% empty %}
+            <p class="text-muted">No status history available.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Listen for storage events (updates from other tabs)
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'product_updated') {
+            const updateData = JSON.parse(e.newValue);
+            if (updateData.product_id == {{ product.id }}) {
+                // Show notification
+                const notification = document.createElement('div');
+                notification.className = 'alert alert-info alert-dismissible fade show position-fixed';
+                notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+                notification.innerHTML = `
+                    <strong>Product Updated!</strong> The product was updated in another tab.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.body.appendChild(notification);
+                
+                // Auto-dismiss after 5 seconds
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 5000);
+                
+                // Optionally refresh the page to show updated data
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            }
+        }
+    });
+    
+    // Listen for messages from parent windows
+    window.addEventListener('message', function(e) {
+        if (e.data.type === 'product_updated') {
+            // Show notification
+            const notification = document.createElement('div');
+            notification.className = 'alert alert-info alert-dismissible fade show position-fixed';
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                <strong>Product Updated!</strong> The product was updated in another window.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(notification);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 5000);
+        }
+    });
+});
+</script>
+{% endblock %}

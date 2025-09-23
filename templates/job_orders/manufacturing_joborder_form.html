@@ -1,0 +1,355 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if edit %}Edit{% else %}Create{% endif %} Manufacturing Job Order
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-industry me-2"></i>
+                        {% if edit %}Edit{% else %}Create{% endif %} Manufacturing Job Order
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- Basic Information -->
+                            <div class="col-md-6">
+                                <h5 class="mb-3">Basic Information</h5>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.name.id_for_label }}" class="form-label">
+                                        {{ form.name.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.name }}
+                                    {% if form.name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.name.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.category.id_for_label }}" class="form-label">
+                                        {{ form.category.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.category }}
+                                    {% if form.category.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.category.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.job_title.id_for_label }}" class="form-label">
+                                        {{ form.job_title.label }}
+                                    </label>
+                                    {{ form.job_title }}
+                                    {% if form.job_title.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.job_title.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.image.id_for_label }}" class="form-label">
+                                        {{ form.image.label }}
+                                    </label>
+                                    {{ form.image }}
+                                    {% if form.image.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.image.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Customer Information -->
+                            <div class="col-md-6">
+                                <h5 class="mb-3">Customer Information</h5>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.organization_name.id_for_label }}" class="form-label">
+                                        {{ form.organization_name.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.organization_name }}
+                                    {% if form.organization_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.organization_name.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.contact_number.id_for_label }}" class="form-label">
+                                        {{ form.contact_number.label }}
+                                    </label>
+                                    {{ form.contact_number }}
+                                    {% if form.contact_number.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.contact_number.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.address.id_for_label }}" class="form-label">
+                                        {{ form.address.label }}
+                                    </label>
+                                    {{ form.address }}
+                                    {% if form.address.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.address.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="row">
+                            <!-- Manufacturing Details -->
+                            <div class="col-md-6">
+                                <h5 class="mb-3">Manufacturing Details</h5>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.treatment.id_for_label }}" class="form-label">
+                                        {{ form.treatment.label }}
+                                    </label>
+                                    {{ form.treatment }}
+                                    {% if form.treatment.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.treatment.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.cutting_length.id_for_label }}" class="form-label">
+                                        {{ form.cutting_length.label }}
+                                    </label>
+                                    {{ form.cutting_length }}
+                                    {% if form.cutting_length.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.cutting_length.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.flap.id_for_label }}" class="form-label">
+                                        {{ form.flap.label }}
+                                    </label>
+                                    {{ form.flap }}
+                                    {% if form.flap.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.flap.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.printing.id_for_label }}" class="form-label">
+                                        {{ form.printing.label }}
+                                    </label>
+                                    {{ form.printing }}
+                                    {% if form.printing.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.printing.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.print_product.id_for_label }}" class="form-label">
+                                        {{ form.print_product.label }}
+                                    </label>
+                                    {{ form.print_product }}
+                                    {% if form.print_product.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.print_product.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.colors.id_for_label }}" class="form-label">
+                                        {{ form.colors.label }}
+                                    </label>
+                                    {{ form.colors }}
+                                    {% if form.colors.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.colors.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Additional Details -->
+                            <div class="col-md-6">
+                                <h5 class="mb-3">Additional Details</h5>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.size.id_for_label }}" class="form-label">
+                                        {{ form.size.label }}
+                                    </label>
+                                    {{ form.size }}
+                                    {% if form.size.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.size.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.micron.id_for_label }}" class="form-label">
+                                        {{ form.micron.label }}
+                                    </label>
+                                    {{ form.micron }}
+                                    {% if form.micron.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.micron.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.order_info.id_for_label }}" class="form-label">
+                                        {{ form.order_info.label }}
+                                    </label>
+                                    {{ form.order_info }}
+                                    {% if form.order_info.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.order_info.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.estimated_delivery_date.id_for_label }}" class="form-label">
+                                        {{ form.estimated_delivery_date.label }}
+                                    </label>
+                                    {{ form.estimated_delivery_date }}
+                                    {% if form.estimated_delivery_date.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.estimated_delivery_date.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="row">
+                            <!-- Pricing & Quantity -->
+                            <div class="col-md-6">
+                                <h5 class="mb-3">Pricing & Quantity</h5>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.price.id_for_label }}" class="form-label">
+                                        {{ form.price.label }}
+                                    </label>
+                                    {{ form.price }}
+                                    {% if form.price.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.price.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.quantity.id_for_label }}" class="form-label">
+                                        {{ form.quantity.label }}
+                                    </label>
+                                    {{ form.quantity }}
+                                    {% if form.quantity.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.quantity.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.order_quantity.id_for_label }}" class="form-label">
+                                        {{ form.order_quantity.label }}
+                                    </label>
+                                    {{ form.order_quantity }}
+                                    {% if form.order_quantity.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.order_quantity.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Production Status -->
+                            <div class="col-md-6">
+                                <h5 class="mb-3">Production Status</h5>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.production_status.id_for_label }}" class="form-label">
+                                        {{ form.production_status.label }}
+                                    </label>
+                                    {{ form.production_status }}
+                                    {% if form.production_status.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.production_status.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% if edit %}{% url 'job_orders:manufacturing_joborder_detail' joborder.pk %}{% else %}{% url 'job_orders:manufacturing_joborder_list' %}{% endif %}" 
+                               class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>
+                                {% if edit %}Update{% else %}Create{% endif %} Job Order
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-control, .form-select {
+    border-radius: 0.375rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.card {
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+</style>
+{% endblock %}

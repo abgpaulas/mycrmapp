@@ -1,0 +1,92 @@
+<!-- Page Header Section -->
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <div class="d-flex align-items-center">
+                        <h6 class="mb-0">Job Orders Management</h6>
+                        <div class="ms-auto">
+                            <a href="{% url 'job_orders:product_create' %}" class="btn btn-primary btn-sm">
+                                <i class="material-icons text-sm me-1">add</i>
+                                New Job Order
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body px-0 pt-0 pb-2">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card bg-gradient-primary" data-stat="product_count">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon icon-shape icon-sm icon-shape-white rounded me-3">
+                                            <i class="material-icons text-sm opacity-10">work</i>
+                                        </div>
+                                        <div>
+                                            <div class="numbers">
+                                                <p class="text-sm mb-0 text-white">Total Products</p>
+                                                <h4 class="font-weight-bolder text-white mb-0" data-value="{{ product_count|default:0 }}">{{ product_count|default:0 }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-gradient-success" data-stat="customer_count">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon icon-shape icon-sm icon-shape-white rounded me-3">
+                                            <i class="material-icons text-sm opacity-10">people</i>
+                                        </div>
+                                        <div>
+                                            <div class="numbers">
+                                                <p class="text-sm mb-0 text-white">Active Customers</p>
+                                                <h4 class="font-weight-bolder text-white mb-0" data-value="{{ customer_count|default:0 }}">{{ customer_count|default:0 }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-gradient-info" data-stat="order_count">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon icon-shape icon-sm icon-shape-white rounded me-3">
+                                            <i class="material-icons text-sm opacity-10">shopping_cart</i>
+                                        </div>
+                                        <div>
+                                            <div class="numbers">
+                                                <p class="text-sm mb-0 text-white">Total Orders</p>
+                                                <h4 class="font-weight-bolder text-white mb-0" data-value="{{ order_count|default:0 }}">{{ order_count|default:0 }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-gradient-warning" data-stat="pending_count">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon icon-shape icon-sm icon-shape-white rounded me-3">
+                                            <i class="material-icons text-sm opacity-10">pending</i>
+                                        </div>
+                                        <div>
+                                            <div class="numbers">
+                                                <p class="text-sm mb-0 text-white">Pending Orders</p>
+                                                <h4 class="font-weight-bolder text-white mb-0" data-value="{{ pending_count|default:0 }}">{{ pending_count|default:0 }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load rbac_tags %}
+
+{% block title %}Bulk Create Users{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h3 class="card-title mb-0">
+                                <i class="ni ni-upload text-primary"></i>
+                                Bulk Create Users
+                            </h3>
+                            <p class="text-sm text-muted mb-0">Create multiple users at once using CSV format</p>
+                        </div>
+                        <div class="col-auto">
+                            <a href="{% url 'rbac:super_admin_user_management' %}" class="btn btn-secondary btn-sm">
+                                <i class="ni ni-bold-left"></i> Back to User Management
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">CSV Format Instructions</h6>
+                        <p class="mb-0">Enter user data in CSV format. The first line should contain headers, and each subsequent line should contain user information.</p>
+                        <hr>
+                        <strong>Required columns:</strong> first_name, last_name, email, phone, role_type<br>
+                        <strong>Example:</strong><br>
+                        <code>
+                            first_name,last_name,email,phone,role_type<br>
+                            John,Doe,john@example.com,+1234567890,manager<br>
+                            Jane,Smith,jane@example.com,+1234567891,accountant
+                        </code>
+                    </div>
+                    
+                    <form method="post" id="bulkCreateForm">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label class="form-control-label">User Data (CSV Format) *</label>
+                            {{ form.users_data }}
+                            {% if form.users_data.errors %}
+                            <div class="text-danger">
+                                {% for error in form.users_data.errors %}
+                                <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-control-label">Company *</label>
+                                    {{ form.company }}
+                                    {% if form.company.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.company.errors %}
+                                        <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-control-label">Default Password *</label>
+                                    {{ form.default_password }}
+                                    {% if form.default_password.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.default_password.errors %}
+                                        <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-check">
+                                {{ form.send_welcome_email }}
+                                <label class="form-check-label" for="{{ form.send_welcome_email.id_for_label }}">
+                                    {{ form.send_welcome_email.label }}
+                                </label>
+                                {% if form.send_welcome_email.help_text %}
+                                <small class="form-text text-muted">{{ form.send_welcome_email.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-success">
+                                <i class="ni ni-upload"></i> Create Users
+                            </button>
+                            <a href="{% url 'rbac:super_admin_user_management' %}" class="btn btn-secondary">
+                                <i class="ni ni-bold-left"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Available Roles Reference -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">Available Role Types</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h6>Super Admin</h6>
+                            <code>super_admin</code>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Company Admin</h6>
+                            <code>company_admin</code>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Manager</h6>
+                            <code>manager</code>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Production Manager</h6>
+                            <code>production_manager</code>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-3">
+                            <h6>Accountant</h6>
+                            <code>accountant</code>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Marketer</h6>
+                            <code>marketer</code>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Store Keeper</h6>
+                            <code>store_keeper</code>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Viewer</h6>
+                            <code>viewer</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

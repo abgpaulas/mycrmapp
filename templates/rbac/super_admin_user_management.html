@@ -1,0 +1,886 @@
+{% extends 'base.html' %}
+{% load rbac_tags %}
+
+{% block title %}Super Admin - User Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h3 class="card-title mb-0">
+                                <i class="ni ni-single-02 text-primary"></i>
+                                User Management
+                            </h3>
+                            <p class="text-sm text-muted mb-0">Manage users and their roles across all companies</p>
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createUserModal">
+                                <i class="ni ni-fat-add"></i> Create User
+                            </button>
+                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#bulkCreateModal">
+                                <i class="ni ni-upload"></i> Bulk Create
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Search and Filter Section -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-control-label">Search Users</label>
+                                <input type="text" id="searchUsers" class="form-control" placeholder="Search by name or email...">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-control-label">Filter by Company</label>
+                                <select id="filterCompany" class="form-select">
+                                    <option value="">All Companies</option>
+                                    {% for company in companies %}
+                                    <option value="{{ company.id }}">{{ company.company_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-control-label">Filter by Role</label>
+                                <select id="filterRole" class="form-select">
+                                    <option value="">All Roles</option>
+                                    {% for role in roles %}
+                                    <option value="{{ role.role_type }}">{{ role.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label class="form-control-label">Status</label>
+                                <select id="filterStatus" class="form-select">
+                                    <option value="">All</option>
+                                    <option value="true">Active</option>
+                                    <option value="false">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Users Table -->
+                    <div class="table-responsive">
+                        <table class="table table-flush" id="usersTable">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th width="60">#</th>
+                                    <th>User</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Company & Role</th>
+                                    <th>Status</th>
+                                    <th>Date Joined</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                {% for user in page_obj %}
+                                <tr data-user-id="{{ user.id }}" data-serial="{{ forloop.counter0|add:page_obj.start_index }}">
+                                    <td class="serial-number">
+                                        <span class="badge badge-sm badge-secondary">{{ forloop.counter0|add:page_obj.start_index }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-sm rounded-circle bg-primary">
+                                                <span class="avatar-initials">{{ user.first_name|first }}{{ user.last_name|first }}</span>
+                                            </div>
+                                            <div class="ms-3">
+                                                <h6 class="mb-0">{{ user.get_full_name }}</h6>
+                                                {% if user.is_staff %}
+                                                <span class="badge badge-sm badge-info">Staff</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.phone|default:"-" }}</td>
+                                    <td>
+                                        {% for user_role in user.user_roles.all %}
+                                            {% if user_role.is_active %}
+                                            <div class="mb-1">
+                                                <span class="badge badge-sm badge-primary">{{ user_role.role.name }}</span>
+                                                <small class="text-muted d-block">{{ user_role.company.company_name }}</small>
+                                            </div>
+                                            {% endif %}
+                                        {% empty %}
+                                        <span class="text-muted">No roles assigned</span>
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        {% if user.is_active %}
+                                        <span class="badge badge-sm badge-success">Active</span>
+                                        {% else %}
+                                        <span class="badge badge-sm badge-danger">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                Actions
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a class="dropdown-item edit-user-btn" href="#" data-user-id="{{ user.id }}">
+                                                        <i class="ni ni-settings"></i> Edit User
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item assign-role-btn" href="#" data-user-id="{{ user.id }}">
+                                                        <i class="ni ni-badge"></i> Assign Role
+                                                    </a>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <a class="dropdown-item text-danger delete-user-btn" href="#" data-user-id="{{ user.id }}">
+                                                        <i class="ni ni-fat-remove"></i> Delete User
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination Info and Controls -->
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <span class="text-sm text-muted">
+                                    Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} users
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            {% if page_obj.has_other_pages %}
+                            <nav aria-label="Users pagination">
+                                <ul class="pagination pagination-sm justify-content-end mb-0">
+                                    {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                    
+                                    {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                    {% elif num > page_obj.number|add:'-2' and num < page_obj.number|add:'2' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                    {% elif num == 1 or num == page_obj.paginator.num_pages %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                    {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                    {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create User Modal -->
+<div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createUserModalLabel">Create New User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="createUserForm">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-control-label">First Name *</label>
+                                <input type="text" name="first_name" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-control-label">Last Name *</label>
+                                <input type="text" name="last_name" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-control-label">Email Address *</label>
+                                <input type="email" name="email" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-control-label">Phone Number</label>
+                                <input type="text" name="phone" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-control-label">Password *</label>
+                                <input type="password" name="password1" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-control-label">Confirm Password *</label>
+                                <input type="password" name="password2" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-control-label">Company *</label>
+                                <select name="company" class="form-select" required>
+                                    <option value="">Select Company</option>
+                                    {% for company in companies %}
+                                    <option value="{{ company.id }}">{{ company.company_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-control-label">Role *</label>
+                                <select name="role" class="form-select" required>
+                                    <option value="">Select Role</option>
+                                    {% for role in roles %}
+                                    <option value="{{ role.id }}">{{ role.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-control-label">Role Expires At (Optional)</label>
+                                <input type="datetime-local" name="expires_at" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="form-check mt-4">
+                                    <input type="checkbox" name="is_staff" class="form-check-input" id="isStaff">
+                                    <label class="form-check-label" for="isStaff">
+                                        Staff Status
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" name="is_active" class="form-check-input" id="isActive" checked>
+                                    <label class="form-check-label" for="isActive">
+                                        Active
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                        Create User
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Create Modal -->
+<div class="modal fade" id="bulkCreateModal" tabindex="-1" aria-labelledby="bulkCreateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bulkCreateModalLabel">Bulk Create Users</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="bulkCreateForm">
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <strong>CSV Format:</strong> Enter user data in CSV format. First line should be headers: first_name,last_name,email,phone,role_type
+                    </div>
+                    <div class="form-group">
+                        <label class="form-control-label">User Data (CSV Format) *</label>
+                        <textarea name="users_data" class="form-control" rows="10" placeholder="first_name,last_name,email,phone,role_type&#10;John,Doe,john@example.com,+1234567890,manager&#10;Jane,Smith,jane@example.com,+1234567891,accountant" required></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-control-label">Company *</label>
+                                <select name="company" class="form-select" required>
+                                    <option value="">Select Company</option>
+                                    {% for company in companies %}
+                                    <option value="{{ company.id }}">{{ company.company_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-control-label">Default Password *</label>
+                                <input type="password" name="default_password" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" name="send_welcome_email" class="form-check-input" id="sendWelcomeEmail" checked>
+                        <label class="form-check-label" for="sendWelcomeEmail">
+                            Send Welcome Email
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                        Create Users
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editUserForm">
+                <input type="hidden" id="editUserId" name="user_id">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-control-label">First Name *</label>
+                                <input type="text" name="first_name" id="editFirstName" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-control-label">Last Name *</label>
+                                <input type="text" name="last_name" id="editLastName" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-control-label">Email Address *</label>
+                                <input type="email" name="email" id="editEmail" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-control-label">Phone Number</label>
+                                <input type="text" name="phone" id="editPhone" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <input type="checkbox" name="is_staff" class="form-check-input" id="editIsStaff">
+                                    <label class="form-check-label" for="editIsStaff">
+                                        Staff Status
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <input type="checkbox" name="is_active" class="form-check-input" id="editIsActive">
+                                    <label class="form-check-label" for="editIsActive">
+                                        Active
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                        Update User
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Assign Role Modal -->
+<div class="modal fade" id="assignRoleModal" tabindex="-1" aria-labelledby="assignRoleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignRoleModalLabel">Assign Role</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="assignRoleForm">
+                <input type="hidden" id="assignRoleUserId" name="user_id">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-control-label">Company *</label>
+                        <select name="company" id="assignRoleCompany" class="form-select" required>
+                            <option value="">Select Company</option>
+                            {% for company in companies %}
+                            <option value="{{ company.id }}">{{ company.company_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-control-label">Role *</label>
+                        <select name="role" id="assignRoleRole" class="form-select" required>
+                            <option value="">Select Role</option>
+                            {% for role in roles %}
+                            <option value="{{ role.id }}">{{ role.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-control-label">Expires At (Optional)</label>
+                        <input type="datetime-local" name="expires_at" id="assignRoleExpires" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                        Assign Role
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-success text-white">
+            <i class="ni ni-check-bold me-2"></i>
+            <strong class="me-auto">Success</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="successToastBody">
+            <!-- Success message will be inserted here -->
+        </div>
+    </div>
+    
+    <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-danger text-white">
+            <i class="ni ni-fat-remove me-2"></i>
+            <strong class="me-auto">Error</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="errorToastBody">
+            <!-- Error message will be inserted here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Toast functions
+    function showToast(type, message) {
+        const toastElement = document.getElementById(type + 'Toast');
+        const toastBody = document.getElementById(type + 'ToastBody');
+        toastBody.textContent = message;
+        const toast = new bootstrap.Toast(toastElement);
+        toast.show();
+    }
+
+    // Serial number recalculation function
+    function recalculateSerialNumbers() {
+        const rows = document.querySelectorAll('#usersTableBody tr:not([style*="display: none"])');
+        const currentPage = getCurrentPageNumber();
+        const itemsPerPage = 10;
+        const startIndex = (currentPage - 1) * itemsPerPage + 1;
+        
+        rows.forEach((row, index) => {
+            const serialNumber = startIndex + index;
+            const serialCell = row.querySelector('.serial-number span');
+            if (serialCell) {
+                serialCell.textContent = serialNumber;
+                row.setAttribute('data-serial', serialNumber);
+            }
+        });
+    }
+
+    // Get current page number from URL or pagination
+    function getCurrentPageNumber() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const page = urlParams.get('page');
+        return page ? parseInt(page) : 1;
+    }
+
+    // Update pagination info
+    function updatePaginationInfo() {
+        const visibleRows = document.querySelectorAll('#usersTableBody tr:not([style*="display: none"])');
+        const totalRows = document.querySelectorAll('#usersTableBody tr').length;
+        const currentPage = getCurrentPageNumber();
+        const itemsPerPage = 10;
+        const startIndex = (currentPage - 1) * itemsPerPage + 1;
+        const endIndex = Math.min(startIndex + visibleRows.length - 1, totalRows);
+        
+        // Update pagination info if element exists
+        const paginationInfo = document.querySelector('.text-sm.text-muted');
+        if (paginationInfo) {
+            paginationInfo.textContent = `Showing ${startIndex} to ${endIndex} of ${totalRows} users`;
+        }
+    }
+
+    // CSRF token setup
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    // Create User Form
+    document.getElementById('createUserForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const spinner = submitBtn.querySelector('.spinner-border');
+        
+        // Show loading state
+        submitBtn.disabled = true;
+        spinner.classList.remove('d-none');
+        
+        fetch('{% url "rbac:api_create_user" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('success', data.message);
+                this.reset();
+                bootstrap.Modal.getInstance(document.getElementById('createUserModal')).hide();
+                // Refresh the page to show new user and recalculate serial numbers
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showToast('error', data.error || 'An error occurred while creating the user');
+            }
+        })
+        .catch(error => {
+            showToast('error', 'An error occurred while creating the user');
+            console.error('Error:', error);
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            spinner.classList.add('d-none');
+        });
+    });
+
+    // Edit User functionality
+    document.querySelectorAll('.edit-user-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const userId = this.dataset.userId;
+            
+            // Fetch user data
+            fetch(`/rbac/api/super-admin/users/`)
+                .then(response => response.json())
+                .then(data => {
+                    const user = data.data.find(u => u.id == userId);
+                    if (user) {
+                        document.getElementById('editUserId').value = user.id;
+                        document.getElementById('editFirstName').value = user.name.split(' ')[0] || '';
+                        document.getElementById('editLastName').value = user.name.split(' ').slice(1).join(' ') || '';
+                        document.getElementById('editEmail').value = user.email;
+                        document.getElementById('editPhone').value = user.phone || '';
+                        document.getElementById('editIsStaff').checked = user.is_staff;
+                        document.getElementById('editIsActive').checked = user.is_active;
+                        
+                        const editModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+                        editModal.show();
+                    }
+                })
+                .catch(error => {
+                    showToast('error', 'Error loading user data');
+                    console.error('Error:', error);
+                });
+        });
+    });
+
+    // Edit User Form
+    document.getElementById('editUserForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const userId = document.getElementById('editUserId').value;
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const spinner = submitBtn.querySelector('.spinner-border');
+        
+        // Show loading state
+        submitBtn.disabled = true;
+        spinner.classList.remove('d-none');
+        
+        fetch(`/rbac/api/super-admin/users/${userId}/edit/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('success', data.message);
+                bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+                // Refresh the page to show updated user
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showToast('error', data.error || 'An error occurred while updating the user');
+            }
+        })
+        .catch(error => {
+            showToast('error', 'An error occurred while updating the user');
+            console.error('Error:', error);
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            spinner.classList.add('d-none');
+        });
+    });
+
+    // Assign Role functionality
+    document.querySelectorAll('.assign-role-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const userId = this.dataset.userId;
+            document.getElementById('assignRoleUserId').value = userId;
+            
+            const assignModal = new bootstrap.Modal(document.getElementById('assignRoleModal'));
+            assignModal.show();
+        });
+    });
+
+    // Assign Role Form
+    document.getElementById('assignRoleForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const spinner = submitBtn.querySelector('.spinner-border');
+        
+        // Show loading state
+        submitBtn.disabled = true;
+        spinner.classList.remove('d-none');
+        
+        fetch('{% url "rbac:api_assign_role" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('success', data.message);
+                this.reset();
+                bootstrap.Modal.getInstance(document.getElementById('assignRoleModal')).hide();
+                // Refresh the page to show updated roles
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showToast('error', data.error || 'An error occurred while assigning the role');
+            }
+        })
+        .catch(error => {
+            showToast('error', 'An error occurred while assigning the role');
+            console.error('Error:', error);
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            spinner.classList.add('d-none');
+        });
+    });
+
+    // Delete User functionality
+    document.querySelectorAll('.delete-user-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const userId = this.dataset.userId;
+            
+            if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+                fetch(`/rbac/api/super-admin/users/${userId}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('success', data.message);
+                        // Remove the row from the table
+                        const rowToRemove = document.querySelector(`tr[data-user-id="${userId}"]`);
+                        if (rowToRemove) {
+                            rowToRemove.remove();
+                            // Recalculate serial numbers after deletion
+                            recalculateSerialNumbers();
+                            updatePaginationInfo();
+                        }
+                    } else {
+                        showToast('error', data.error || 'An error occurred while deleting the user');
+                    }
+                })
+                .catch(error => {
+                    showToast('error', 'An error occurred while deleting the user');
+                    console.error('Error:', error);
+                });
+            }
+        });
+    });
+
+    // Search and Filter functionality
+    function filterUsers() {
+        const searchTerm = document.getElementById('searchUsers').value.toLowerCase();
+        const companyFilter = document.getElementById('filterCompany').value;
+        const roleFilter = document.getElementById('filterRole').value;
+        const statusFilter = document.getElementById('filterStatus').value;
+        
+        const rows = document.querySelectorAll('#usersTableBody tr');
+        
+        rows.forEach(row => {
+            const userText = row.textContent.toLowerCase();
+            const userRow = row;
+            
+            let showRow = true;
+            
+            // Search filter
+            if (searchTerm && !userText.includes(searchTerm)) {
+                showRow = false;
+            }
+            
+            // Company filter
+            if (companyFilter) {
+                const companyCell = userRow.querySelector('td:nth-child(5)'); // Updated column index
+                if (companyCell && !companyCell.textContent.includes(companyFilter)) {
+                    showRow = false;
+                }
+            }
+            
+            // Role filter
+            if (roleFilter) {
+                const roleCell = userRow.querySelector('td:nth-child(5)'); // Updated column index
+                if (roleCell && !roleCell.textContent.toLowerCase().includes(roleFilter.toLowerCase())) {
+                    showRow = false;
+                }
+            }
+            
+            // Status filter
+            if (statusFilter) {
+                const statusCell = userRow.querySelector('td:nth-child(6)'); // Updated column index
+                if (statusCell) {
+                    const isActive = statusCell.textContent.includes('Active');
+                    if ((statusFilter === 'true' && !isActive) || (statusFilter === 'false' && isActive)) {
+                        showRow = false;
+                    }
+                }
+            }
+            
+            userRow.style.display = showRow ? '' : 'none';
+        });
+        
+        // Recalculate serial numbers after filtering
+        recalculateSerialNumbers();
+        updatePaginationInfo();
+    }
+
+    // Add event listeners for filters
+    document.getElementById('searchUsers').addEventListener('input', filterUsers);
+    document.getElementById('filterCompany').addEventListener('change', filterUsers);
+    document.getElementById('filterRole').addEventListener('change', filterUsers);
+    document.getElementById('filterStatus').addEventListener('change', filterUsers);
+
+    // Initialize serial numbers on page load
+    recalculateSerialNumbers();
+    updatePaginationInfo();
+});
+</script>
+{% endblock %}

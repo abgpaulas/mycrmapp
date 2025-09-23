@@ -1,0 +1,32 @@
+{% load rbac_tags %}
+
+<div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+  <div class="card">
+    <div class="card-header p-3 pt-2">
+      <div class="icon icon-lg icon-shape bg-gradient-success shadow-success text-center border-radius-xl mt-n4 position-absolute">
+        <i class="material-icons opacity-10">security</i>
+      </div>
+      <div class="text-end pt-1">
+        <p class="text-sm mb-0 text-capitalize">My Roles</p>
+        <h4 class="mb-0">{{ user_roles|length }}</h4>
+      </div>
+    </div>
+    <hr class="dark horizontal my-0">
+    <div class="card-footer p-3">
+      <div class="d-flex align-items-center">
+        <div class="flex-grow-1">
+          {% if user_roles %}
+            {% for role in user_roles %}
+              <span class="badge bg-gradient-primary me-1">{{ role.role.name }}</span>
+            {% endfor %}
+          {% else %}
+            <span class="text-muted">No roles assigned</span>
+          {% endif %}
+        </div>
+        <a href="{% url 'rbac:my_permissions' %}" class="btn btn-outline-success btn-sm">
+          View Details
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

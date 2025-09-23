@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manufacturing Job Orders{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-industry me-2"></i>Manufacturing Job Orders
+                    </h4>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'job_orders:manufacturing_joborder_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i>New Job Order
+                        </a>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-download me-1"></i>Export
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'job_orders:export_manufacturing_excel' %}">
+                                    <i class="fas fa-file-excel me-2"></i>Export to Excel
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'job_orders:export_manufacturing_pdf' %}">
+                                    <i class="fas fa-file-pdf me-2"></i>Export to PDF
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="searchInput" placeholder="Search job orders...">
+                                <button class="btn btn-outline-secondary" type="button" id="searchBtn">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <span class="text-muted">Showing {{ filtered_count }} of {{ total_joborders }} job orders</span>
+                        </div>
+                    </div>
+
+                    {% if joborders %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Job Order #</th>
+                                    <th>Name</th>
+                                    <th>Category</th>
+                                    <th>Organization</th>
+                                    <th>Status</th>
+                                    <th>Est. Delivery</th>
+                                    <th>Overdue</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for joborder in joborders %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ joborder.job_order }}</strong>
+                                        {% if joborder.submission_id %}
+                                        <br><small class="text-muted">{{ joborder.submission_id }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ joborder.name|default:"-" }}</td>
+                                    <td>
+                                        <span class="badge bg-info">{{ joborder.category|default:"-" }}</span>
+                                    </td>
+                                    <td>{{ joborder.organization_name|default:"-" }}</td>
+                                    <td>
+                                        {% if joborder.status == 'draft' %}
+                                            <span class="badge bg-secondary">Draft</span>
+                                        {% elif joborder.status == 'submitted' %}
+                                            <span class="badge bg-info">Submitted</span>
+                                        {% elif joborder.status == 'pending' %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% elif joborder.status == 'approved' %}
+                                            <span class="badge bg-success">Approved</span>
+                                        {% elif joborder.status == 'rejected' %}
+                                            <span class="badge bg-danger">Rejected</span>
+                                        {% elif joborder.status == 'in_production' %}
+                                            <span class="badge bg-primary">In Production</span>
+                                        {% elif joborder.status == 'completed' %}
+                                            <span class="badge bg-success">Completed</span>
+                                        {% elif joborder.status == 'delivered' %}
+                                            <span class="badge bg-success">Delivered</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if joborder.estimated_delivery_date %}
+                                            {{ joborder.estimated_delivery_date|date:"M d, Y" }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if joborder.is_overdue %}
+                                            <span class="badge bg-danger">Overdue</span>
+                                        {% else %}
+                                            <span class="badge bg-success">On Time</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'job_orders:manufacturing_joborder_detail' joborder.pk %}" 
+                                               class="btn btn-sm btn-outline-primary" title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if joborder.is_editable %}
+                                            <a href="{% url 'job_orders:manufacturing_joborder_edit' joborder.pk %}" 
+                                               class="btn btn-sm btn-outline-warning" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            {% endif %}
+                                            <a href="{% url 'job_orders:manufacturing_joborder_print' joborder.pk %}" 
+                                               class="btn btn-sm btn-outline-info" title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-industry fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No manufacturing job orders found</h5>
+                        <p class="text-muted">Create your first manufacturing job order to get started.</p>
+                        <a href="{% url 'job_orders:manufacturing_joborder_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i>Create Job Order
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const tableRows = document.querySelectorAll('tbody tr');
+
+    function performSearch() {
+        const searchTerm = searchInput.value.toLowerCase();
+        
+        tableRows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    searchBtn.addEventListener('click', performSearch);
+    searchInput.addEventListener('keyup', performSearch);
+});
+</script>
+{% endblock %}

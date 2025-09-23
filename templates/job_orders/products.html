@@ -1,0 +1,1005 @@
+{% extends 'base.html' %}
+{% block title %}Products Page{% endblock %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block content %}
+<style>
+/* Enhanced form styling for Raise Job Order form */
+.card .form-control,
+.card .form-select,
+.card textarea,
+.card input[type="text"],
+.card input[type="email"],
+.card input[type="number"],
+.card input[type="date"],
+.card input[type="file"] {
+    border: 2px solid #e9ecef !important;
+    border-radius: 8px !important;
+    padding: 12px 15px !important;
+    font-size: 14px !important;
+    transition: all 0.3s ease !important;
+    background-color: #fff !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.card .form-control:focus,
+.card .form-select:focus,
+.card textarea:focus,
+.card input[type="text"]:focus,
+.card input[type="email"]:focus,
+.card input[type="number"]:focus,
+.card input[type="date"]:focus {
+    border-color: #007bff !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+    outline: none !important;
+}
+
+.card .form-control:hover,
+.card .form-select:hover,
+.card textarea:hover,
+.card input[type="text"]:hover,
+.card input[type="email"]:hover,
+.card input[type="number"]:hover,
+.card input[type="date"]:hover {
+    border-color: #007bff !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+}
+
+.card label {
+    font-weight: 600 !important;
+    color: #495057 !important;
+    margin-bottom: 8px !important;
+    font-size: 14px !important;
+}
+
+.card .form-text {
+    color: #6c757d !important;
+    font-size: 12px !important;
+    margin-top: 5px !important;
+}
+
+.card .invalid-feedback {
+    color: #dc3545 !important;
+    font-size: 12px !important;
+    margin-top: 5px !important;
+}
+
+.card .btn-success {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+    border-radius: 8px !important;
+    padding: 12px 30px !important;
+    font-weight: 600 !important;
+    font-size: 16px !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3) !important;
+}
+
+.card .btn-success:hover {
+    background-color: #218838 !important;
+    border-color: #1e7e34 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4) !important;
+}
+
+.card .btn-success:active {
+    transform: translateY(0) !important;
+}
+
+/* Form field spacing */
+.card .form-group {
+    margin-bottom: 20px !important;
+}
+
+.card .form-group:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* File input styling */
+.card input[type="file"] {
+    padding: 8px 12px !important;
+    border: 2px dashed #dee2e6 !important;
+    background-color: #f8f9fa !important;
+}
+
+.card input[type="file"]:hover {
+    border-color: #007bff !important;
+    background-color: #e3f2fd !important;
+}
+
+/* Select dropdown styling */
+.card .form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 12px center !important;
+    background-size: 16px 12px !important;
+    padding-right: 40px !important;
+}
+
+/* Textarea specific styling */
+.card textarea {
+    resize: vertical !important;
+    min-height: 80px !important;
+}
+
+/* Required field indicator */
+.card label[for*="required"]:after,
+.card .required:after {
+    content: " *" !important;
+    color: #dc3545 !important;
+    font-weight: bold !important;
+}
+
+/* Form section headers */
+.card h5 {
+    color: #007bff !important;
+    font-weight: 700 !important;
+    margin-bottom: 20px !important;
+    padding-bottom: 10px !important;
+    border-bottom: 2px solid #e9ecef !important;
+}
+
+.card hr {
+    border-color: #e9ecef !important;
+    margin: 20px 0 !important;
+}
+
+/* Card styling */
+.card {
+    border: 1px solid #e9ecef !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+    transition: all 0.3s ease !important;
+}
+
+.card:hover {
+    box-shadow: 0 8px 15px rgba(0,0,0,0.15) !important;
+    transform: translateY(-2px) !important;
+}
+
+.card-body {
+    padding: 25px !important;
+}
+
+/* Approval Status Styling */
+.approval-status-container {
+    position: relative;
+    min-width: 120px;
+}
+
+.approval-header {
+    text-align: center;
+}
+
+.approval-select {
+    border: 2px solid #007bff !important;
+    border-radius: 6px !important;
+    background-color: #f8f9fa !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    font-weight: 600 !important;
+}
+
+.approval-select:hover {
+    border-color: #0056b3 !important;
+    background-color: #e3f2fd !important;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3) !important;
+}
+
+.approval-select:focus {
+    border-color: #0056b3 !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+    outline: none !important;
+}
+
+.approval-status-display {
+    text-align: center;
+}
+
+.approval-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.approval-badge.approval-approved {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.approval-badge.approval-pending {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.approval-badge.approval-rejected {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.approval-badge.approval-none {
+    background-color: #e2e3e5;
+    color: #383d41;
+    border: 1px solid #d6d8db;
+}
+
+.approval-badge i {
+    margin-right: 4px;
+}
+
+/* Table header styling for approval status */
+th:nth-child(22) {
+    background-color: #007bff !important;
+    color: white !important;
+    position: relative;
+}
+
+th:nth-child(22):after {
+    content: "👆 Click to change";
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: #007bff;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+/* Add a help tooltip for the approval status column */
+.approval-help {
+    position: relative;
+    display: inline-block;
+    margin-left: 5px;
+    cursor: help;
+}
+
+.approval-help:hover::after {
+    content: "Staff members can click on the dropdown to change the approval status of job orders";
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.approval-help:hover::before {
+    content: "";
+    position: absolute;
+    bottom: 115%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #333;
+    z-index: 1000;
+}
+
+/* Enhanced Pagination Styling */
+.pagination-wrapper {
+    position: relative;
+    z-index: 10;
+}
+
+.pagination-wrapper .pagination {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
+}
+
+.pagination-wrapper .page-item {
+    margin: 0;
+    display: inline-block;
+}
+
+.pagination-wrapper .page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    border: 2px solid #dee2e6;
+    background-color: #ffffff;
+    color: #495057;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    min-height: 45px;
+}
+
+.pagination-wrapper .page-link:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+    color: #495057;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.pagination-wrapper .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+}
+
+.pagination-wrapper .page-item.active .page-link:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+/* Responsive pagination */
+@media (max-width: 768px) {
+    .pagination-wrapper .page-link {
+        padding: 10px 12px;
+        font-size: 13px;
+        min-width: 40px;
+    }
+    
+    .pagination-wrapper .pagination {
+        gap: 4px;
+    }
+}
+
+@media (max-width: 576px) {
+    .pagination-wrapper .page-link {
+        padding: 8px 10px;
+        font-size: 12px;
+        min-width: 35px;
+    }
+    
+    .pagination-wrapper .pagination {
+        gap: 2px;
+    }
+    
+    .pagination-wrapper .page-link i {
+        display: none;
+    }
+}
+</style>
+{% include 'partials/topside.html' %}
+
+<div class="row my-4">
+    <div class="col-md-4">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="card card-body">
+            <h5>Raise Job Order</h5>
+            <hr>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <input class="btn btn-success btn-block" type="submit" value="Add">
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card card-body mb-3">
+            <form method="GET" class="form-inline">
+                <div class="row w-100">
+                    <div class="col-md-4">
+                        <input type="text" name="search" class="form-control w-100" placeholder="Search Job Order Number, organization..." value="{{ request.GET.search }}">
+                    </div>
+                    <div class="col-md-4">
+                        <select name="status" class="form-control w-100">
+                            <option value="">All Status</option>
+                            <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="approved" {% if request.GET.status == 'approved' %}selected{% endif %}>Approved</option>
+                            <option value="rejected" {% if request.GET.status == 'rejected' %}selected{% endif %}>Rejected</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                        <a href="{% url 'job_orders:products' %}" class="btn btn-secondary ml-2">Reset</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="d-flex justify-content-end mb-3">
+            <a class="btn btn-primary" href="{% url 'job_orders:export_products_pdf' %}">Export to PDF</a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table bg-white table-bordered" style="min-width: 1500px;">
+                <thead class="bg-info text-white sticky-top">
+                    <tr>
+                        <th>S/N</th>
+                        <th>Date</th>
+                        <th>Job Order Number</th>
+                        <th>Image</th>
+                        <th>Job Name</th>
+                        <th>Customer Name</th>
+                        <th>Contact Number</th>
+                        <th>Package Type/Product</th>
+                        <th>No. of Colors/Color Names</th>
+                        <th>Treatment</th>
+                        <th>Cutting Length</th>
+                        <th>Flap</th>
+                        <th>Thickness/Width</th>
+                        <th>Price ({{ currency_symbol }})</th>
+                        <th>Extrusion Quantity</th>
+                        <th>Delivery Quantity</th>
+                        <th>Total ({{ currency_symbol }})</th>
+                        <th>Est. Delivery</th>
+                        <th>Act. Delivery</th>
+                        <th>Cycle Time</th>
+                        <th>Submission ID</th>
+                        <th>Approval Status 
+                            <i class="fas fa-question-circle approval-help" title="Click to change approval status"></i>
+                        </th>
+                        <th>Created By</th>
+                        <th>Approved By</th>
+                        <th>Production Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for product in products %}
+                    <tr class="clickable-row" data-href="{% url 'job_orders:product_view' product.job_order %}">
+                        <td>{{ products.start_index|add:forloop.counter0 }}</td>
+                        <td>{{ product.date_created|date:"DATETIME_FORMAT" }}</td>
+                        <td>{{ product.job_order }}</td>
+                        <td>
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" alt="Product Image" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                            {% else %}
+                                <span class="text-muted">No image</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ product.organization_name }}</td>
+                        <td>{{ product.address }}</td>
+                        <td>{{ product.contact_number }}</td>
+                        <td>{{ product.print_product }}</td>
+                        <td>{{ product.colors }}</td>
+                        <td>{{ product.treatment }}</td>
+                        <td>{{ product.cutting_length }}</td>
+                        <td>{{ product.flap }}</td>
+                        <td>{{ product.size }}</td>
+                        <td>{{ product.formatted_price }}</td>
+                        <td>{{ product.job_title }}</td>
+                        <td>{{ product.order_quantity }}</td>
+                        <td>{{ product.formatted_total }}</td>
+                        <td>{{ product.estimated_delivery_date|date:"Y-m-d" }}</td>
+                        <td>{{ product.actual_delivery_date|date:"Y-m-d" }}</td>
+                        <td>{{ product.cycle_time }}</td>
+                        <td>{{ product.submission_id }}</td>
+                        <td id="approval-buttons-{{ product.id }}">
+                            {% if user.is_staff %}
+                                <div class="approval-status-container">
+                                    <div class="approval-header">
+                                        <small class="text-muted d-block mb-1">
+                                            <i class="fas fa-mouse-pointer"></i> Click to change
+                                        </small>
+                                    </div>
+                                    <select onchange="updateApprovalStatus({{ product.id }}, this.value)" 
+                                            class="form-control form-control-sm approval-select" 
+                                            data-product-id="{{ product.id }}"
+                                            title="Click to change approval status">
+                                        <option value="" {% if not product.approval_status %}selected{% endif %}>
+                                            <i class="fas fa-question-circle"></i> Select Status
+                                        </option>
+                                        <option value="approved" {% if product.approval_status == 'approved' %}selected{% endif %}>
+                                            <i class="fas fa-check-circle"></i> Approve
+                                        </option>
+                                        <option value="pending" {% if product.approval_status == 'pending' %}selected{% endif %}>
+                                            <i class="fas fa-clock"></i> Pending
+                                        </option>
+                                        <option value="rejected" {% if product.approval_status == 'rejected' %}selected{% endif %}>
+                                            <i class="fas fa-times-circle"></i> Reject
+                                        </option>
+                                    </select>
+                                    <small class="text-info d-block mt-1">
+                                        <i class="fas fa-info-circle"></i> Staff only
+                                    </small>
+                                </div>
+                            {% else %}
+                                <div class="approval-status-display">
+                                    <span class="approval-badge approval-{{ product.approval_status|default:'none' }}">
+                                        {% if product.approval_status == 'approved' %}
+                                            <i class="fas fa-check-circle"></i> Approved
+                                        {% elif product.approval_status == 'pending' %}
+                                            <i class="fas fa-clock"></i> Pending
+                                        {% elif product.approval_status == 'rejected' %}
+                                            <i class="fas fa-times-circle"></i> Rejected
+                                        {% else %}
+                                            <i class="fas fa-question-circle"></i> Not Set
+                                        {% endif %}
+                                    </span>
+                                    <small class="text-muted d-block mt-1">
+                                        <i class="fas fa-lock"></i> Staff can change
+                                    </small>
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td>{{ product.created_by.email }}</td>
+                        <td>{{ product.approved_by.email|default:"Not yet approved" }}</td>
+                        <td class="production-status-cell" onclick="event.stopPropagation();">
+                            <div class="production-status-container">
+                                <textarea class="form-control production-status"
+                                        data-product-id="{{ product.id }}"
+                                        rows="2"
+                                        placeholder="Enter production status...">{{ product.production_status }}</textarea>
+                                <button class="btn btn-primary btn-sm mt-2 save-status-btn"
+                                        data-product-id="{{ product.id }}">
+                                    Save Status
+                                </button>
+                                <small class="text-muted d-block mt-1">
+                                    {% if product.production_status_date %}
+                                        Last updated: {{ product.production_status_date|date:"Y-m-d H:i:s" }}
+                                        <br>
+                                        Updated by: {{ product.updated_by.email|default:"Unknown" }}
+                                    {% else %}
+                                        Not updated yet
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </td>
+                        <td class="no-click">
+                            <a class="btn btn-primary btn-sm mr-2" href="{% url 'job_orders:product_view' product.job_order %}">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            <a class="btn btn-info btn-sm mr-2" href="{% url 'job_orders:product_edit' product.id %}">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <a class="btn btn-danger btn-sm" href="{% url 'job_orders:product_delete' product.id %}">
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination - Improved responsive design -->
+        <div class="pagination-wrapper" style="margin-top: 40px; margin-bottom: 40px; padding: 25px 15px; background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); clear: both; overflow-x: auto;">
+            <div class="container-fluid px-0">
+                <nav aria-label="Page navigation" class="d-flex justify-content-center">
+                    <ul class="pagination pagination-lg mb-0 flex-wrap justify-content-center" style="gap: 5px;">
+                        {% if products.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" style="min-width: 60px; text-align: center; border-radius: 8px; margin: 0 2px;">
+                                    <i class="fas fa-angle-double-left"></i> First
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ products.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" style="min-width: 80px; text-align: center; border-radius: 8px; margin: 0 2px;">
+                                    <i class="fas fa-angle-left"></i> Previous
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in products.paginator.page_range %}
+                            <li class="page-item {% if products.number == num %}active{% endif %}">
+                                <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" 
+                                   style="min-width: 45px; text-align: center; border-radius: 8px; margin: 0 2px; {% if products.number == num %}background-color: #007bff; border-color: #007bff; color: white;{% endif %}">
+                                    {{ num }}
+                                </a>
+                            </li>
+                        {% endfor %}
+
+                        {% if products.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ products.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" style="min-width: 80px; text-align: center; border-radius: 8px; margin: 0 2px;">
+                                    Next <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ products.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" style="min-width: 60px; text-align: center; border-radius: 8px; margin: 0 2px;">
+                                    Last <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                
+                <!-- Page info -->
+                <div class="text-center mt-4">
+                    <div class="alert alert-info d-inline-block mb-0" style="padding: 10px 20px; border-radius: 20px; font-size: 14px;">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Showing {{ products.start_index }} to {{ products.end_index }} of {{ products.paginator.count }} entries</strong>
+                        {% if products.paginator.num_pages > 1 %}
+                            <br><small class="text-muted">Page {{ products.number }} of {{ products.paginator.num_pages }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Show helpful message for new users about approval status
+    if (!localStorage.getItem('approvalStatusHelpShown')) {
+        setTimeout(() => {
+            const helpMessage = document.createElement('div');
+            helpMessage.className = 'alert alert-info alert-dismissible fade show position-fixed';
+            helpMessage.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 350px;';
+            helpMessage.innerHTML = `
+                <strong><i class="fas fa-info-circle"></i> Quick Tip:</strong><br>
+                Staff members can click on the <strong>Approval Status</strong> dropdown to change job order status.<br>
+                <small class="text-muted">This message won't show again.</small>
+                <button type="button" class="btn-close" onclick="this.parentElement.remove(); localStorage.setItem('approvalStatusHelpShown', 'true');"></button>
+            `;
+            document.body.appendChild(helpMessage);
+            
+            // Auto-dismiss after 8 seconds
+            setTimeout(() => {
+                if (helpMessage.parentElement) {
+                    helpMessage.remove();
+                    localStorage.setItem('approvalStatusHelpShown', 'true');
+                }
+            }, 8000);
+        }, 2000);
+    }
+
+    // Price and quantity calculation
+    const priceInput = document.getElementById('id_price');
+    const quantityInput = document.getElementById('id_order_quantity');
+
+    function calculateTotal() {
+        const price = parseFloat(priceInput.value) || 0;
+        const quantity = parseInt(quantityInput.value) || 0;
+        const total = price * quantity;
+        // Update total field if it exists
+        const totalInput = document.getElementById('id_total');
+        if (totalInput) {
+            totalInput.value = total.toFixed(2);
+        }
+    }
+
+    if (priceInput && quantityInput) {
+        priceInput.addEventListener('input', calculateTotal);
+        quantityInput.addEventListener('input', calculateTotal);
+        calculateTotal();
+    }
+
+    // Production Status Update Handler
+    document.querySelectorAll('.save-status-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const container = this.closest('.production-status-container');
+            const textarea = container.querySelector('.production-status');
+            const productId = textarea.dataset.productId;
+            const statusText = textarea.value;
+            const timestamp = container.querySelector('small');
+            
+            button.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+            button.disabled = true;
+            textarea.disabled = true;
+            
+            fetch('{% url "job_orders:update_production_status" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `product_id=${productId}&new_status=${encodeURIComponent(statusText)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    button.innerHTML = '<i class="fas fa-check"></i> Saved!';
+                    button.classList.remove('btn-primary');
+                    button.classList.add('btn-success');
+                    textarea.value = statusText;
+                    
+                    timestamp.innerHTML = `Last updated: ${new Date().toLocaleString()}<br>Updated by: {{ user.email }}`;
+                    timestamp.classList.add('text-success');
+                    textarea.style.backgroundColor = '#e8f0fe';
+                    
+                    setTimeout(() => {
+                        button.innerHTML = 'Save Status';
+                        button.classList.remove('btn-success');
+                        button.classList.add('btn-primary');
+                        button.disabled = false;
+                        textarea.disabled = false;
+                        textarea.style.backgroundColor = '';
+                        timestamp.classList.remove('text-success');
+                    }, 1500);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                button.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+                button.classList.remove('btn-primary');
+                button.classList.add('btn-danger');
+                textarea.disabled = false;
+                button.disabled = false;
+                timestamp.classList.add('text-danger');
+                
+                setTimeout(() => {
+                    button.innerHTML = 'Save Status';
+                    button.classList.remove('btn-danger');
+                    button.classList.add('btn-primary');
+                    timestamp.classList.remove('text-danger');
+                }, 2000);
+            });
+        });
+    });
+
+    // Quick save with Enter key
+    document.querySelectorAll('.production-status').forEach(textarea => {
+        textarea.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const saveButton = this.closest('.production-status-container').querySelector('.save-status-btn');
+                if (!saveButton.disabled) {
+                    saveButton.click();
+                }
+            }
+        });
+
+        // Auto-resize textarea
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+    });
+
+    // Add hover effect for better UX
+    const style = document.createElement('style');
+    style.textContent = `
+        .clickable-row:hover td:not(.no-click) {
+            background-color: rgba(0,123,255,0.1);
+            transition: background-color 0.2s;
+        }
+        .clickable-row {
+            cursor: pointer;
+        }
+        .no-click {
+            cursor: default;
+        }
+    `;
+    document.head.appendChild(style);
+});
+
+// Update approval status function
+function updateApprovalStatus(productId, newStatus) {
+    console.log(`Updating approval status for product ${productId} to ${newStatus}`);
+    
+    // Get the select element
+    const selectElement = document.querySelector(`select[data-product-id="${productId}"]`);
+    if (!selectElement) {
+        console.error('Select element not found for product ID:', productId);
+        return;
+    }
+    
+    // Show loading state
+    selectElement.disabled = true;
+    selectElement.style.opacity = '0.6';
+    
+    // Get CSRF token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    // Make AJAX request to update approval status
+    fetch(`/job-orders/product/${productId}/approve/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `action=${newStatus}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            showNotification(data.message, 'success');
+            
+            // Update the select element to show the new status
+            selectElement.value = newStatus;
+            
+            // Update the visual feedback
+            selectElement.style.backgroundColor = '#d4edda';
+            selectElement.style.borderColor = '#28a745';
+            
+            // Reset after a short delay
+            setTimeout(() => {
+                selectElement.style.backgroundColor = '';
+                selectElement.style.borderColor = '';
+            }, 2000);
+            
+        } else {
+            // Show error message
+            showNotification(data.message || 'Failed to update approval status', 'error');
+            
+            // Revert the select value
+            selectElement.value = selectElement.getAttribute('data-original-value') || '';
+        }
+    })
+    .catch(error => {
+        console.error('Error updating approval status:', error);
+        showNotification('Error updating approval status: ' + error.message, 'error');
+        
+        // Revert the select value
+        selectElement.value = selectElement.getAttribute('data-original-value') || '';
+    })
+    .finally(() => {
+        // Re-enable the select element
+        selectElement.disabled = false;
+        selectElement.style.opacity = '1';
+    });
+}
+
+// Store original values when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.approval-select').forEach(select => {
+        select.setAttribute('data-original-value', select.value);
+    });
+});
+
+// Notification function
+function showNotification(message, type) {
+    // Remove existing notifications
+    const existingNotifications = document.querySelectorAll('.notification-alert');
+    existingNotifications.forEach(notification => notification.remove());
+    
+    // Create new notification
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show notification-alert position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        <strong>${type.charAt(0).toUpperCase() + type.slice(1)}!</strong> ${message}
+        <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+    `;
+    document.body.appendChild(notification);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+</script>
+
+<!-- Real-time Dashboard Updates -->
+<script src="{% static 'js/dashboard-realtime.js' %}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Listen for storage events (updates from other tabs)
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'product_updated') {
+            const updateData = JSON.parse(e.newValue);
+            
+            // Show notification
+            const notification = document.createElement('div');
+            notification.className = 'alert alert-info alert-dismissible fade show position-fixed';
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                <strong>Product Updated!</strong> Job Order ${updateData.data.job_order} was updated in another tab.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(notification);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 5000);
+            
+            // Update the specific row in the table if it exists
+            const productRow = document.querySelector(`tr[data-href*="${updateData.data.job_order}"]`);
+            if (productRow) {
+                // Highlight the updated row
+                productRow.style.backgroundColor = '#d4edda';
+                setTimeout(() => {
+                    productRow.style.backgroundColor = '';
+                }, 3000);
+                
+                // Update specific cells with new data
+                const cells = productRow.querySelectorAll('td');
+                if (cells.length > 0) {
+                    // Update organization name (index 5)
+                    if (cells[5]) cells[5].textContent = updateData.data.organization_name || '';
+                    // Update address (index 6) 
+                    if (cells[6]) cells[6].textContent = updateData.data.address || '';
+                    // Update contact number (index 7)
+                    if (cells[7]) cells[7].textContent = updateData.data.contact_number || '';
+                    // Update print product (index 8)
+                    if (cells[8]) cells[8].textContent = updateData.data.print_product || '';
+                    // Update colors (index 9)
+                    if (cells[9]) cells[9].textContent = updateData.data.colors || '';
+                    // Update treatment (index 10)
+                    if (cells[10]) cells[10].textContent = updateData.data.treatment || '';
+                    // Update cutting length (index 11)
+                    if (cells[11]) cells[11].textContent = updateData.data.cutting_length || '';
+                    // Update flap (index 12)
+                    if (cells[12]) cells[12].textContent = updateData.data.flap || '';
+                    // Update size (index 13)
+                    if (cells[13]) cells[13].textContent = updateData.data.size || '';
+                    // Update price (index 14)
+                    if (cells[14]) cells[14].textContent = updateData.data.formatted_price || '';
+                    // Update job title (index 15)
+                    if (cells[15]) cells[15].textContent = updateData.data.job_title || '';
+                    // Update order quantity (index 16)
+                    if (cells[16]) cells[16].textContent = updateData.data.order_quantity || '';
+                    // Update total (index 17)
+                    if (cells[17]) cells[17].textContent = updateData.data.formatted_total || '';
+                    // Update estimated delivery (index 18)
+                    if (cells[18]) cells[18].textContent = updateData.data.estimated_delivery_date || '';
+                    // Update actual delivery (index 19)
+                    if (cells[19]) cells[19].textContent = updateData.data.actual_delivery_date || '';
+                }
+                
+                // Update approval status if it exists
+                const approvalContainer = document.getElementById(`approval-buttons-${updateData.data.id}`);
+                if (approvalContainer && updateData.data.approval_status) {
+                    // Update the approval status display
+                    const approvalBadge = approvalContainer.querySelector('.approval-badge');
+                    if (approvalBadge) {
+                        approvalBadge.className = `approval-badge approval-${updateData.data.approval_status}`;
+                        approvalBadge.innerHTML = updateData.data.approval_status === 'approved' 
+                            ? '<i class="fas fa-check-circle"></i> Approved'
+                            : updateData.data.approval_status === 'rejected'
+                            ? '<i class="fas fa-times-circle"></i> Rejected'
+                            : '<i class="fas fa-clock"></i> Pending';
+                    }
+                    
+                    // Update approval select dropdown if it exists
+                    const approvalSelect = approvalContainer.querySelector('.approval-select');
+                    if (approvalSelect) {
+                        approvalSelect.value = updateData.data.approval_status;
+                    }
+                }
+            }
+        }
+    });
+    
+    // Listen for messages from parent windows
+    window.addEventListener('message', function(e) {
+        if (e.data.type === 'product_updated') {
+            // Show notification
+            const notification = document.createElement('div');
+            notification.className = 'alert alert-info alert-dismissible fade show position-fixed';
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                <strong>Product Updated!</strong> Job Order ${e.data.data.job_order} was updated in another window.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(notification);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 5000);
+        }
+    });
+});
+</script>
+{% endblock %}
