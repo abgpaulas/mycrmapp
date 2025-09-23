@@ -1,0 +1,120 @@
+[33mcommit ea11364e90ecb8ba605e2b928b13330ddac0923d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: stevebusinessapp <cityprintmarketingdept@gmail.com>
+Date:   Tue Sep 23 13:58:27 2025 +0100
+
+    Initial commit: Multi-purpose business application with Django
+
+ .env.example                                       |    22 [32m+[m
+ .gitattributes                                     |     2 [32m+[m
+ .gitignore                                         |   167 [32m+[m
+ apps/__init__.py                                   |     1 [32m+[m
+ apps/accounting/__init__.py                        |     0
+ apps/accounting/admin.py                           |   163 [32m+[m
+ apps/accounting/api_urls.py                        |     9 [32m+[m
+ apps/accounting/apps.py                            |    11 [32m+[m
+ apps/accounting/forms.py                           |   246 [32m+[m
+ apps/accounting/management/__init__.py             |     1 [32m+[m
+ apps/accounting/management/commands/__init__.py    |     1 [32m+[m
+ .../commands/create_sample_transactions.py         |   120 [32m+[m
+ .../management/commands/sync_accounting_data.py    |   287 [32m+[m
+ .../management/commands/test_ledger_display.py     |   128 [32m+[m
+ .../commands/update_transactions_currency.py       |   112 [32m+[m
+ apps/accounting/migrations/0001_initial.py         |   316 [32m+[m
+ apps/accounting/migrations/__init__.py             |     0
+ apps/accounting/models.py                          |   255 [32m+[m
+ apps/accounting/serializers.py                     |     3 [32m+[m
+ apps/accounting/signals.py                         |   195 [32m+[m
+ .../static/accounting/css/accounting.css           |   607 [32m+[m
+ apps/accounting/static/accounting/js/accounting.js |   464 [32m+[m
+ .../accounting/templates/accounting/dashboard.html |   989 [32m++[m
+ .../templates/accounting/generate_report.html      |   319 [32m+[m
+ .../templates/accounting/ledger_summary.html       |   400 [32m+[m
+ .../templates/accounting/sync_from_other_apps.html |   115 [32m+[m
+ .../accounting/transaction_confirm_delete.html     |   105 [32m+[m
+ .../templates/accounting/transaction_form.html     |   423 [32m+[m
+ .../templates/accounting/transactions.html         |   776 [32m+[m
+ .../templates/accounting/view_report.html          |   423 [32m+[m
+ apps/accounting/templatetags/__init__.py           |     1 [32m+[m
+ apps/accounting/urls.py                            |    32 [32m+[m
+ apps/accounting/views.py                           |  2217 [32m+++[m
+ apps/accounts/__init__.py                          |     1 [32m+[m
+ apps/accounts/admin.py                             |    65 [32m+[m
+ apps/accounts/api_urls.py                          |    18 [32m+[m
+ apps/accounts/api_views.py                         |   175 [32m+[m
+ apps/accounts/apps.py                              |     7 [32m+[m
+ apps/accounts/backends.py                          |    26 [32m+[m
+ apps/accounts/forms.py                             |   192 [32m+[m
+ apps/accounts/management/__init__.py               |     1 [32m+[m
+ apps/accounts/management/commands/__init__.py      |     1 [32m+[m
+ apps/accounts/management/commands/test_email.py    |    69 [32m+[m
+ apps/accounts/migrations/0001_initial.py           |   112 [32m+[m
+ ...r_bio_user_birth_date_user_location_and_more.py |    43 [32m+[m
+ apps/accounts/migrations/__init__.py               |     1 [32m+[m
+ apps/accounts/models.py                            |    70 [32m+[m
+ apps/accounts/serializers.py                       |   104 [32m+[m
+ apps/accounts/templates/accounts/base.html         |    54 [32m+[m
+ apps/accounts/templates/accounts/dashboard.html    |    67 [32m+[m
+ apps/accounts/templates/accounts/login.html        |   677 [32m+[m
+ .../accounts/password_reset_complete.html          |   454 [32m+[m
+ .../templates/accounts/password_reset_confirm.html |   779 [32m+[m
+ .../templates/accounts/password_reset_done.html    |   406 [32m+[m
+ .../templates/accounts/password_reset_email.html   |    15 [32m+[m
+ .../templates/accounts/password_reset_form.html    |   534 [32m+[m
+ apps/accounts/templates/accounts/profile.html      |    79 [32m+[m
+ apps/accounts/templates/accounts/profile_edit.html |   337 [32m+[m
+ apps/accounts/templates/accounts/profile_view.html |   264 [32m+[m
+ apps/accounts/templates/accounts/register.html     |   864 [32m+[m
+ apps/accounts/urls.py                              |    49 [32m+[m
+ apps/accounts/validators.py                        |    50 [32m+[m
+ apps/accounts/views.py                             |   239 [32m+[m
+ apps/clients/__init__.py                           |     0
+ apps/clients/admin.py                              |     9 [32m+[m
+ apps/clients/api_urls.py                           |     8 [32m+[m
+ apps/clients/api_views.py                          |    46 [32m+[m
+ apps/clients/apps.py                               |     7 [32m+[m
+ apps/clients/forms.py                              |    26 [32m+[m
+ apps/clients/migrations/0001_initial.py            |    57 [32m+[m
+ apps/clients/migrations/__init__.py                |     0
+ apps/clients/models.py                             |    21 [32m+[m
+ apps/clients/serializers.py                        |     3 [32m+[m
+ .../templates/clients/client_confirm_delete.html   |   189 [32m+[m
+ apps/clients/templates/clients/client_detail.html  |   323 [32m+[m
+ apps/clients/templates/clients/client_form.html    |   201 [32m+[m
+ apps/clients/templates/clients/client_list.html    |   387 [32m+[m
+ apps/clients/urls.py                               |    12 [32m+[m
+ apps/clients/views.py                              |   153 [32m+[m
+ apps/company_management/__init__.py                |     0
+ apps/company_management/admin.py                   |    80 [32m+[m
+ apps/company_management/apps.py                    |     7 [32m+[m
+ apps/company_management/forms.py                   |   164 [32m+[m
+ apps/company_management/management/__init__.py     |     0
+ .../management/commands/__init__.py                |     0
+ .../management/commands/create_sample_data.py      |   159 [32m+[m
+ apps/company_management/migrations/0001_initial.py |   266 [32m+[m
+ apps/company_management/migrations/__init__.py     |     0
+ apps/company_management/models.py                  |   122 [32m+[m
+ apps/company_management/serializers.py             |   114 [32m+[m
+ .../company_management/company_detail.html         |   316 [32m+[m
+ .../templates/company_management/company_form.html |   165 [32m+[m
+ .../templates/company_management/company_list.html |   501 [32m+[m
+ .../company_management/company_user_form.html      |   145 [32m+[m
+ .../company_management/company_user_remove.html    |    59 [32m+[m
+ apps/company_management/tests.py                   |     3 [32m+[m
+ apps/company_management/urls.py                    |    23 [32m+[m
+ apps/company_management/views.py                   |   315 [32m+[m
+ apps/core/__init__.py                              |     1 [32m+[m
+ apps/core/admin.py                                 |   120 [32m+[m
+ apps/core/api_urls.py                              |    16 [32m+[m
+ apps/core/api_views.py                             |   132 [32m+[m
+ apps/core/apps.py                                  |     7 [32m+[m
+ apps/core/context_processors.py                    |   253 [32m+[m
+ apps/core/forms.py                                 |   231 [32m+[m
+ .../management/commands/fix_all_logos_to_png.py    |    27 [32m+[m
+ apps/core/migrations/0001_initial.py               |   127 [32m+[m
+ apps/core/migrations/__init__.py                   |     1 [32m+[m
+ apps/core/models.py                                |   179 [32m+[m
+ apps/core/serializers.py                           |   127 [32m+[m
+ apps/core/templates/core/bank_account_form.html    |   158 [32m+[m
+ apps/core/templates/core/bank_accounts.html        |   415 [32m+[m
+ apps/core/templates/core/company_profile.html      |   583 [32m+[m
+ apps/core/templates/core/confirm_delete.html

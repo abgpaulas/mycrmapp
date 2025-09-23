@@ -13,7 +13,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-your-secret-key-here')
 DEBUG = config('DEBUG', default=True, cast=bool)
 DEBUG_INVENTORY = config('DEBUG_INVENTORY', default=True, cast=bool)
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver', '*']
+
+# Allow Railway domain and local development
+RAILWAY_PUBLIC_DOMAIN = config('RAILWAY_PUBLIC_DOMAIN', default='')
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
+if RAILWAY_PUBLIC_DOMAIN:
+    ALLOWED_HOSTS.extend([
+        RAILWAY_PUBLIC_DOMAIN,
+        f'*.{RAILWAY_PUBLIC_DOMAIN}',
+    ])
+if DEBUG:
+    ALLOWED_HOSTS.append('*')
 
 # Application definition
 DJANGO_APPS = [
@@ -91,12 +101,19 @@ TEMPLATES = [
 WSGI_APPLICATION = 'business_app.wsgi.application'
 
 # Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Use PostgreSQL on Railway, SQLite for local development
+if config('DATABASE_URL', default=''):
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.parse(config('DATABASE_URL'))
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Caching for better performance
 CACHES = {
