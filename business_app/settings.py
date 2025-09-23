@@ -14,14 +14,24 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-your-secret-key-here'
 DEBUG = config('DEBUG', default=True, cast=bool)
 DEBUG_INVENTORY = config('DEBUG_INVENTORY', default=True, cast=bool)
 
-# Allow Railway domain and local development
+# Allow deployment domains and local development
 RAILWAY_PUBLIC_DOMAIN = config('RAILWAY_PUBLIC_DOMAIN', default='')
+RENDER_EXTERNAL_HOSTNAME = config('RENDER_EXTERNAL_HOSTNAME', default='')
+
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
+
+# Add Railway domain if provided
 if RAILWAY_PUBLIC_DOMAIN:
     ALLOWED_HOSTS.extend([
         RAILWAY_PUBLIC_DOMAIN,
         f'*.{RAILWAY_PUBLIC_DOMAIN}',
     ])
+
+# Add Render domain if provided
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+# Allow all hosts in debug mode
 if DEBUG:
     ALLOWED_HOSTS.append('*')
 
@@ -160,8 +170,11 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Performance optimizations
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+# Performance optimizations for production
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+else:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 # Session optimization
 SESSION_CACHE_ALIAS = 'default'

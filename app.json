@@ -1,0 +1,41 @@
+{
+  "name": "MyCRM App",
+  "description": "Multi-purpose business management Django application",
+  "repository": "https://github.com/abgpaulas/mycrmapp",
+  "logo": "https://raw.githubusercontent.com/abgpaulas/mycrmapp/main/static/img/logo.png",
+  "keywords": ["django", "crm", "business", "management"],
+  "success_url": "/dashboard/",
+  "scripts": {
+    "postdeploy": "python manage.py migrate && python manage.py collectstatic --noinput"
+  },
+  "env": {
+    "SECRET_KEY": {
+      "description": "Django secret key",
+      "generator": "secret"
+    },
+    "DEBUG": {
+      "description": "Debug mode",
+      "value": "False"
+    },
+    "DEBUG_INVENTORY": {
+      "description": "Debug inventory mode",
+      "value": "False"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "addons": [
+    {
+      "plan": "heroku-postgresql:mini"
+    }
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ]
+}
