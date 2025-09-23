@@ -1,5 +1,6 @@
 # Updated: 2025-09-23 - Using SQLite database for simplicity
 # FORCE DEPLOYMENT: This comment forces Render to use the latest commit
+# VERSION: 2.0 - Database setup script included
 services:
   - type: web
     name: mycrmapp
