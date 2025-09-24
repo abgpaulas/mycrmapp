@@ -12,4 +12,5 @@ urlpatterns = [
     path('bank-accounts/<int:pk>/delete/', views.delete_bank_account, name='delete_bank_account'),
     path('bank-accounts/<int:pk>/set-default/', views.set_default_bank_account, name='set_default_bank_account'),
     path('update-currency/', views.update_currency, name='update_currency'),
+    path('db-test/', views.db_test, name='db_test'),  # Temporary debug endpoint
 ]

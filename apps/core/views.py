@@ -4,6 +4,8 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from django.db import connection
+from django.conf import settings
 import json
 
 from .models import CompanyProfile, BankAccount
@@ -16,6 +18,37 @@ def landing_page(request, **kwargs):
     """Landing page for non-authenticated users"""
     # Accept any kwargs to prevent errors from middleware
     return render(request, 'core/landing_page.html')
+
+
+def db_test(request):
+    """Temporary database connection test for debugging"""
+    try:
+        # Test database connection
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            result = cursor.fetchone()
+        
+        db_info = {
+            'status': 'success',
+            'database_engine': settings.DATABASES['default']['ENGINE'],
+            'database_name': settings.DATABASES['default'].get('NAME', 'N/A'),
+            'database_host': settings.DATABASES['default'].get('HOST', 'N/A'),
+            'database_port': settings.DATABASES['default'].get('PORT', 'N/A'),
+            'database_user': settings.DATABASES['default'].get('USER', 'N/A'),
+            'test_query_result': result[0] if result else None,
+        }
+        
+        return JsonResponse(db_info)
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'error': str(e),
+            'database_engine': settings.DATABASES['default']['ENGINE'],
+            'database_name': settings.DATABASES['default'].get('NAME', 'N/A'),
+            'database_host': settings.DATABASES['default'].get('HOST', 'N/A'),
+            'database_port': settings.DATABASES['default'].get('PORT', 'N/A'),
+            'database_user': settings.DATABASES['default'].get('USER', 'N/A'),
+        })
 
 
 @login_required
