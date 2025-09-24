@@ -15,19 +15,26 @@ def main():
     print(f"DATABASE_URL: {'SET' if os.environ.get('DATABASE_URL') else 'NOT SET'}")
     print(f"RENDER: {'SET' if os.environ.get('RENDER') else 'NOT SET'}")
     
-    # Migrations should already be run during build, but let's verify
-    print("📦 Verifying database migrations...")
+    # Setup database with migrations
+    print("📦 Setting up database...")
     try:
         result = subprocess.run([
-            sys.executable, 'manage.py', 'showmigrations', '--plan'
+            sys.executable, 'manage.py', 'setup_database'
         ], capture_output=True, text=True)
         
-        print(f"Migration status: {result.stdout}")
+        print(f"Database setup output: {result.stdout}")
         if result.stderr:
-            print(f"Migration warnings: {result.stderr}")
+            print(f"Database setup errors: {result.stderr}")
+        
+        if result.returncode == 0:
+            print("✅ Database setup completed successfully")
+        else:
+            print(f"❌ Database setup failed with return code: {result.returncode}")
+            print("⚠️  Continuing with server start...")
             
     except Exception as e:
-        print(f"❌ Error checking migrations: {e}")
+        print(f"❌ Error setting up database: {e}")
+        print("⚠️  Continuing with server start...")
     
     # Start Gunicorn
     print("🎉 Starting Gunicorn server...")
