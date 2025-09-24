@@ -13,9 +13,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-your-secret-key-here')
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-# Temporarily enable debug mode for Render to see error details
-if config('RENDER', default=False, cast=bool):
-    DEBUG = True
+# Temporarily enable debug mode for Render to see error details (disabled after fixes)
+# if config('RENDER', default=False, cast=bool):
+#     DEBUG = True
 
 DEBUG_INVENTORY = config('DEBUG_INVENTORY', default=True, cast=bool)
 
