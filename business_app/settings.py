@@ -122,12 +122,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'business_app.wsgi.application'
 
-# Database
-# Use PostgreSQL on Railway/Render, SQLite for local development
-DATABASE_URL = config('DATABASE_URL', default='')
+# Database Configuration
+# Priority: DATABASE_URL > RENDER PostgreSQL config > SQLite
 
-# Render-specific database configuration - prioritize DATABASE_URL
-if config('RENDER', default=False, cast=bool):
+# Try to get DATABASE_URL from environment
+DATABASE_URL = config('DATABASE_URL', default='')
+RENDER_MODE = config('RENDER', default=False, cast=bool)
+
+# Force PostgreSQL for Render deployment
+if RENDER_MODE:
     if DATABASE_URL:
         # Use DATABASE_URL from Render environment
         import dj_database_url
@@ -135,14 +138,14 @@ if config('RENDER', default=False, cast=bool):
             'default': dj_database_url.parse(DATABASE_URL)
         }
     else:
-        # Fallback to individual PostgreSQL config for Render
+        # Use individual PostgreSQL environment variables for Render
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.postgresql',
-                'NAME': config('PGDATABASE', default='railway'),
-                'USER': config('PGUSER', default='postgres'),
+                'NAME': config('PGDATABASE', default='mycrmapp'),
+                'USER': config('PGUSER', default='mycrmapp_user'),
                 'PASSWORD': config('PGPASSWORD', default=''),
-                'HOST': config('PGHOST', default='localhost'),
+                'HOST': config('PGHOST', default='dpg-d39actggjchc73dk1r8g-a'),
                 'PORT': config('PGPORT', default='5432'),
             }
         }

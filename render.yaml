@@ -23,6 +23,31 @@ services:
           name: mycrmapp-db
           property: connectionString
           key: DATABASE_URL
+      - fromDatabase:
+          type: postgresql
+          name: mycrmapp-db
+          property: host
+          key: PGHOST
+      - fromDatabase:
+          type: postgresql
+          name: mycrmapp-db
+          property: port
+          key: PGPORT
+      - fromDatabase:
+          type: postgresql
+          name: mycrmapp-db
+          property: database
+          key: PGDATABASE
+      - fromDatabase:
+          type: postgresql
+          name: mycrmapp-db
+          property: user
+          key: PGUSER
+      - fromDatabase:
+          type: postgresql
+          name: mycrmapp-db
+          property: password
+          key: PGPASSWORD
     healthCheckPath: "/dashboard/landing/"
     plan: free
 
