@@ -78,6 +78,11 @@ class RegisterView(CreateView):
             )
             return super().form_valid(form)
         except Exception as e:
+            # Log the error for debugging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"User registration error: {str(e)}", exc_info=True)
+            
             messages.error(
                 self.request,
                 f'Error creating account: {str(e)}. Please try again or contact support.'
