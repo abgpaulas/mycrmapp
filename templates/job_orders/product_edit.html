@@ -1,0 +1,404 @@
+{% extends 'base.html' %}
+{% block title %}Edit Product{% endblock %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+{% include 'partials/topside.html' %}
+
+<div class="row my-4">
+    <div class="col-md-8 mx-auto">
+        <div class="card card-body">
+            <h5>Edit Job Order - {{ product.job_order }}</h5>
+            <hr>
+            
+            <!-- Success/Error Messages -->
+            <div id="message-container" class="alert" style="display: none;"></div>
+            
+            <!-- Django Form Errors -->
+            {% if form.errors %}
+                <div class="alert alert-danger">
+                    <h6><i class="fas fa-exclamation-triangle"></i> Please correct the following errors:</h6>
+                    <ul class="mb-0">
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            
+            <form id="product-edit-form" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <!-- Hidden field for total calculation -->
+                <input type="hidden" id="id_total" name="total" value="{{ product.total|default:0 }}">
+                
+                <!-- Basic Information -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.job_order.id_for_label }}">{{ form.job_order.label }}</label>
+                            {{ form.job_order }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.submission_id.id_for_label }}">{{ form.submission_id.label }}</label>
+                            {{ form.submission_id }}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Customer Information -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.organization_name.id_for_label }}">{{ form.organization_name.label }}</label>
+                            {{ form.organization_name }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.contact_number.id_for_label }}">{{ form.contact_number.label }}</label>
+                            {{ form.contact_number }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label for="{{ form.address.id_for_label }}">{{ form.address.label }}</label>
+                            {{ form.address }}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Product Details -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.print_product.id_for_label }}">{{ form.print_product.label }}</label>
+                            {{ form.print_product }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.colors.id_for_label }}">{{ form.colors.label }}</label>
+                            {{ form.colors }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.treatment.id_for_label }}">{{ form.treatment.label }}</label>
+                            {{ form.treatment }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.cutting_length.id_for_label }}">{{ form.cutting_length.label }}</label>
+                            {{ form.cutting_length }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.flap.id_for_label }}">{{ form.flap.label }}</label>
+                            {{ form.flap }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.printing.id_for_label }}">{{ form.printing.label }}</label>
+                            {{ form.printing }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.size.id_for_label }}">{{ form.size.label }}</label>
+                            {{ form.size }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.micron.id_for_label }}">{{ form.micron.label }}</label>
+                            {{ form.micron }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.job_title.id_for_label }}">{{ form.job_title.label }}</label>
+                            {{ form.job_title }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.quantity.id_for_label }}">{{ form.quantity.label }}</label>
+                            {{ form.quantity }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label for="{{ form.order_info.id_for_label }}">{{ form.order_info.label }}</label>
+                            {{ form.order_info }}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pricing and Quantity -->
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="{{ form.price.id_for_label }}">{{ form.price.label }}</label>
+                            {{ form.price }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="{{ form.order_quantity.id_for_label }}">{{ form.order_quantity.label }}</label>
+                            {{ form.order_quantity }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Total</label>
+                            <input type="text" id="total-display" class="form-control" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Delivery Dates -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.estimated_delivery_date.id_for_label }}">{{ form.estimated_delivery_date.label }}</label>
+                            {{ form.estimated_delivery_date }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.actual_delivery_date.id_for_label }}">{{ form.actual_delivery_date.label }}</label>
+                            {{ form.actual_delivery_date }}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Image Upload -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label for="{{ form.image.id_for_label }}">{{ form.image.label }}</label>
+                            {{ form.image }}
+                            {% if product.image %}
+                                <div class="mt-2">
+                                    <small class="text-muted">Current image:</small><br>
+                                    <img src="{{ product.image.url }}" alt="Current product image" class="img-thumbnail" style="max-width: 200px;">
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Admin Fields (for superusers only) -->
+                {% if user.is_superuser %}
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h6 class="text-primary">Admin Settings</h6>
+                        <hr>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="{{ form.approval_status.id_for_label }}">{{ form.approval_status.label }}</label>
+                            {{ form.approval_status }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="{{ form.approved_by.id_for_label }}">{{ form.approved_by.label }}</label>
+                            {{ form.approved_by }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="{{ form.created_by.id_for_label }}">{{ form.created_by.label }}</label>
+                            {{ form.created_by }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary" id="submit-btn">
+                            <i class="fas fa-save"></i> Update Product
+                        </button>
+                        <a href="{% url 'job_orders:product_detail' product.id %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <button type="button" class="btn btn-info" id="ajax-save-btn">
+                            <i class="fas fa-sync"></i> Save with Ajax
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('product-edit-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const ajaxSaveBtn = document.getElementById('ajax-save-btn');
+    const messageContainer = document.getElementById('message-container');
+    const priceInput = document.getElementById('id_price');
+    const quantityInput = document.getElementById('id_order_quantity');
+    const totalDisplay = document.getElementById('total-display');
+    
+    // Price and quantity calculation
+    function calculateTotal() {
+        const price = parseFloat(priceInput.value) || 0;
+        const quantity = parseInt(quantityInput.value) || 0;
+        const total = price * quantity;
+        totalDisplay.value = total.toFixed(2);
+        
+        // Update the total in the form if there's a hidden field
+        const totalHiddenField = document.getElementById('id_total');
+        if (totalHiddenField) {
+            totalHiddenField.value = total;
+        }
+    }
+    
+    if (priceInput && quantityInput) {
+        priceInput.addEventListener('input', calculateTotal);
+        quantityInput.addEventListener('input', calculateTotal);
+        calculateTotal();
+    }
+    
+    // Show message function
+    function showMessage(message, type = 'success') {
+        messageContainer.className = `alert alert-${type}`;
+        messageContainer.textContent = message;
+        messageContainer.style.display = 'block';
+        
+        setTimeout(() => {
+            messageContainer.style.display = 'none';
+        }, 5000);
+    }
+    
+    // Handle Ajax form submission
+    ajaxSaveBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Clear previous validation errors
+        document.querySelectorAll('.is-invalid').forEach(field => {
+            field.classList.remove('is-invalid');
+        });
+        document.querySelectorAll('.invalid-feedback').forEach(error => {
+            error.remove();
+        });
+        
+        const formData = new FormData(form);
+        const submitButton = this;
+        const originalText = submitButton.innerHTML;
+        
+        // Show loading state
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        submitButton.disabled = true;
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showMessage(data.message, 'success');
+                
+                // Update the product detail page if it's open in another tab/window
+                if (window.opener && !window.opener.closed) {
+                    window.opener.postMessage({
+                        type: 'product_updated',
+                        data: data.product_data
+                    }, '*');
+                }
+                
+                // Broadcast to other tabs/windows
+                if (typeof(Storage) !== "undefined") {
+                    localStorage.setItem('product_updated', JSON.stringify({
+                        product_id: data.product_data.id,
+                        data: data.product_data,
+                        timestamp: new Date().getTime()
+                    }));
+                }
+                
+            } else {
+                showMessage(data.message, 'danger');
+                
+                // Display validation errors
+                if (data.errors) {
+                    Object.keys(data.errors).forEach(field => {
+                        const fieldElement = document.getElementById(`id_${field}`);
+                        if (fieldElement) {
+                            fieldElement.classList.add('is-invalid');
+                            const errorDiv = document.createElement('div');
+                            errorDiv.className = 'invalid-feedback';
+                            errorDiv.textContent = data.errors[field][0];
+                            fieldElement.parentNode.appendChild(errorDiv);
+                        }
+                    });
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showMessage('An error occurred while saving. Please try again.', 'danger');
+        })
+        .finally(() => {
+            // Reset button state
+            submitButton.innerHTML = originalText;
+            submitButton.disabled = false;
+        });
+    });
+    
+    // Listen for storage events (updates from other tabs)
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'product_updated') {
+            const updateData = JSON.parse(e.newValue);
+            if (updateData.product_id == {{ product.id }}) {
+                showMessage('Product was updated in another tab.', 'info');
+                // Optionally refresh the form with new data
+                location.reload();
+            }
+        }
+    });
+    
+    // Listen for messages from parent windows
+    window.addEventListener('message', function(e) {
+        if (e.data.type === 'product_updated') {
+            showMessage('Product was updated in another window.', 'info');
+        }
+    });
+});
+</script>
+{% endblock %}

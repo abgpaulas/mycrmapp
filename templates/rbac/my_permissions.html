@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load rbac_tags %}
+
+{% block title %}My Permissions{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/material-dashboard.css' %}" rel="stylesheet" />
+<style>
+    .permission-card {
+        border-left: 4px solid #e91e63;
+        transition: transform 0.2s;
+    }
+    .permission-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .role-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+    .permission-list {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    .permission-item {
+        padding: 0.5rem;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .permission-item:last-child {
+        border-bottom: none;
+    }
+    .permission-icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 8px;
+        font-size: 10px;
+    }
+    .permission-granted {
+        background-color: #4caf50;
+        color: white;
+    }
+    .permission-denied {
+        background-color: #f44336;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">My Permissions & Roles</h6>
+                        <span class="badge bg-gradient-primary">{{ user_roles|length }} Active Role{{ user_roles|length|pluralize }}</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- User Info Section -->
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center">
+                                {% if user.profile_picture %}
+                                <img src="{{ user.profile_picture.url }}" class="rounded-circle me-3" width="60" height="60" alt="Profile">
+                                {% else %}
+                                <div class="rounded-circle bg-gradient-primary d-flex align-items-center justify-content-center text-white me-3" style="width: 60px; height: 60px;">
+                                    {{ user.first_name|first }}{{ user.last_name|first }}
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <h5 class="mb-0">{{ user.get_full_name }}</h5>
+                                    <p class="text-muted mb-0">{{ user.email }}</p>
+                                    {% if company %}
+                                    <small class="text-info">
+                                        <i class="fas fa-building"></i> {{ company.company_name }}
+                                    </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            {% if user.is_superuser %}
+                            <span class="badge bg-gradient-danger fs-6">Super Admin</span>
+                            {% endif %}
+                            {% if user.is_staff %}
+                            <span class="badge bg-gradient-warning fs-6">Staff</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Roles Section -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="mb-3">My Active Roles</h6>
+                            {% if user_roles %}
+                            <div class="row">
+                                {% for user_role in user_roles %}
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="card permission-card">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h6 class="card-title mb-0">{{ user_role.role.name }}</h6>
+                                                {% if user_role.is_expired %}
+                                                <span class="badge bg-gradient-danger">Expired</span>
+                                                {% else %}
+                                                <span class="badge bg-gradient-success">Active</span>
+                                                {% endif %}
+                                            </div>
+                                            <p class="card-text text-muted small">{{ user_role.role.description }}</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-calendar"></i> {{ user_role.assigned_at|date:"M d, Y" }}
+                                                </small>
+                                                {% if user_role.expires_at %}
+                                                <small class="text-warning">
+                                                    <i class="fas fa-clock"></i> Expires {{ user_role.expires_at|date:"M d, Y" }}
+                                                </small>
+                                                {% endif %}
+                                            </div>
+                                            {% if user_role.assigned_by %}
+                                            <small class="text-info d-block mt-1">
+                                                <i class="fas fa-user"></i> Assigned by {{ user_role.assigned_by.get_full_name }}
+                                            </small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-user-times fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">You don't have any assigned roles yet.</p>
+                                <p class="text-muted">Contact your administrator to get assigned appropriate roles.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Permissions Summary -->
+                    {% if permissions %}
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="mb-3">My Permissions Summary</h6>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3 text-center">
+                                            <div class="border-end">
+                                                <h4 class="text-success">{{ permissions|length }}</h4>
+                                                <small class="text-muted">Total Permissions</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 text-center">
+                                            <div class="border-end">
+                                                <h4 class="text-primary">{{ user_roles|length }}</h4>
+                                                <small class="text-muted">Active Roles</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 text-center">
+                                            <div class="border-end">
+                                                <h4 class="text-info">
+                                                    {% if user.is_superuser %}Yes{% else %}No{% endif %}
+                                                </h4>
+                                                <small class="text-muted">Super User</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 text-center">
+                                            <div>
+                                                <h4 class="text-warning">
+                                                    {% if user.is_staff %}Yes{% else %}No{% endif %}
+                                                </h4>
+                                                <small class="text-muted">Staff Member</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Permissions -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6 class="mb-3">Detailed Permissions</h6>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="permission-list">
+                                        {% for permission in permissions %}
+                                        <div class="permission-item">
+                                            <div class="d-flex align-items-center">
+                                                <div class="permission-icon permission-granted">
+                                                    <i class="fas fa-check"></i>
+                                                </div>
+                                                <span class="fw-bold">{{ permission|format_permission_name }}</span>
+                                            </div>
+                                            <small class="text-muted">{{ permission }}</small>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- No Permissions Message -->
+                    {% if not permissions and not user_roles %}
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="text-center py-5">
+                                <i class="fas fa-lock fa-4x text-muted mb-4"></i>
+                                <h5 class="text-muted">No Permissions Assigned</h5>
+                                <p class="text-muted">
+                                    You don't have any specific permissions assigned yet. 
+                                    Contact your system administrator to get the appropriate access levels.
+                                </p>
+                                <a href="{% url 'core:dashboard' %}" class="btn btn-primary">
+                                    <i class="fas fa-home"></i> Go to Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

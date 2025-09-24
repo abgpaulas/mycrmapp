@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card my-4">
+                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                    <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="text-white text-capitalize ps-3">{{ title }}</h6>
+                            <div class="pe-3">
+                                <a href="{% url 'company_management:company_list' %}" 
+                                   class="btn btn-outline-light btn-sm">
+                                    <i class="fas fa-arrow-left"></i> Back to List
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.user.id_for_label }}" class="form-label">{{ form.user.label }} *</label>
+                                    {{ form.user }}
+                                    {% if form.user.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.user.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.company.id_for_label }}" class="form-label">{{ form.company.label }} *</label>
+                                    {{ form.company }}
+                                    {% if form.company.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.company.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.role.id_for_label }}" class="form-label">{{ form.role.label }} *</label>
+                                    {{ form.role }}
+                                    {% if form.role.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.role.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.expires_at.id_for_label }}" class="form-label">{{ form.expires_at.label }}</label>
+                                    {{ form.expires_at }}
+                                    {% if form.expires_at.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.expires_at.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-check">
+                                {{ form.is_primary }}
+                                <label class="form-check-label" for="{{ form.is_primary.id_for_label }}">
+                                    {{ form.is_primary.label }}
+                                </label>
+                            </div>
+                            {% if form.is_primary.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.is_primary.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-user-plus"></i> Assign User
+                            </button>
+                            <a href="{% url 'company_management:company_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load users when company changes
+    document.getElementById('{{ form.company.id_for_label }}').addEventListener('change', function() {
+        const companyId = this.value;
+        if (companyId) {
+            loadUsers(companyId);
+        } else {
+            document.getElementById('{{ form.user.id_for_label }}').innerHTML = '<option value="">Select a user...</option>';
+        }
+    });
+});
+
+function loadUsers(companyId) {
+    fetch(`{% url "company_management:ajax_get_users" %}?company_id=${companyId}`)
+        .then(response => response.json())
+        .then(data => {
+            const userSelect = document.getElementById('{{ form.user.id_for_label }}');
+            userSelect.innerHTML = '<option value="">Select a user...</option>';
+            data.users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = `${user.first_name} ${user.last_name} (${user.email})`;
+                userSelect.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error loading users:', error));
+}
+</script>
+{% endblock %}

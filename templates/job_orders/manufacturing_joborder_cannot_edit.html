@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cannot Edit Manufacturing Job Order{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-lock me-2"></i>Cannot Edit Job Order
+                    </h4>
+                </div>
+                <div class="card-body text-center">
+                    <i class="fas fa-ban fa-3x text-warning mb-3"></i>
+                    <h5>This manufacturing job order cannot be edited</h5>
+                    <p class="text-muted">
+                        <strong>Job Order #:</strong> {{ joborder.job_order }}<br>
+                        <strong>Current Status:</strong> 
+                        {% if joborder.status == 'approved' %}
+                            <span class="badge bg-success">Approved</span>
+                        {% elif joborder.status == 'rejected' %}
+                            <span class="badge bg-danger">Rejected</span>
+                        {% elif joborder.status == 'in_production' %}
+                            <span class="badge bg-primary">In Production</span>
+                        {% elif joborder.status == 'completed' %}
+                            <span class="badge bg-success">Completed</span>
+                        {% elif joborder.status == 'delivered' %}
+                            <span class="badge bg-success">Delivered</span>
+                        {% endif %}
+                    </p>
+                    <p class="text-info">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Job orders can only be edited when they are in Draft, Submitted, or Pending status.
+                    </p>
+                    
+                    <div class="d-flex gap-2 justify-content-center">
+                        <a href="{% url 'job_orders:manufacturing_joborder_detail' joborder.pk %}" class="btn btn-primary">
+                            <i class="fas fa-eye me-1"></i>View Details
+                        </a>
+                        <a href="{% url 'job_orders:manufacturing_joborder_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+</style>
+{% endblock %}

@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load rbac_tags %}
+
+{% block title %}User Role History{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/material-dashboard.css' %}" rel="stylesheet" />
+<style>
+    .history-card {
+        border-left: 4px solid #2196f3;
+    }
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    .status-active {
+        background-color: #4caf50;
+        color: white;
+    }
+    .status-inactive {
+        background-color: #f44336;
+        color: white;
+    }
+    .status-expired {
+        background-color: #ff9800;
+        color: white;
+    }
+    .user-info {
+        background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- User Info Header -->
+            <div class="user-info">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h4 class="mb-1">{{ user.get_full_name|default:user.email }}</h4>
+                        <p class="mb-0 opacity-8">{{ user.email }}</p>
+                        {% if user.company_profile %}
+                            <small class="opacity-6">{{ user.company_profile.company_name }}</small>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4 text-end">
+                        {% if user.is_active %}
+                            <span class="badge bg-success">Active User</span>
+                        {% else %}
+                            <span class="badge bg-danger">Inactive User</span>
+                        {% endif %}
+                        {% if user.is_superuser %}
+                            <span class="badge bg-warning text-dark">Super Admin</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card history-card">
+                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                    <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+                        <h6 class="text-white text-capitalize ps-3">Role History</h6>
+                        <p class="text-white ps-3 mb-0">Complete role assignment history for this user</p>
+                    </div>
+                </div>
+                <div class="card-body px-0 pb-2">
+                    {% if user_roles %}
+                        <div class="table-responsive p-0">
+                            <table class="table align-items-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Role</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Company</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Assigned Date</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Assigned By</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Expires</th>
+                                        <th class="text-secondary opacity-7"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user_role in user_roles %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex px-2 py-1">
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    <h6 class="mb-0 text-sm">{{ user_role.role.name }}</h6>
+                                                    <p class="text-xs text-secondary mb-0">{{ user_role.role.description|default:"No description" }}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">{{ user_role.company.company_name }}</h6>
+                                                <p class="text-xs text-secondary mb-0">{{ user_role.company.company_type|default:"Business" }}</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if user_role.is_active %}
+                                                {% if user_role.is_expired %}
+                                                    <span class="status-badge status-expired">Expired</span>
+                                                {% else %}
+                                                    <span class="status-badge status-active">Active</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="status-badge status-inactive">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="text-secondary text-xs font-weight-bold">{{ user_role.assigned_at|date:"M d, Y" }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">{{ user_role.assigned_by.get_full_name|default:user_role.assigned_by.email }}</h6>
+                                                <p class="text-xs text-secondary mb-0">{{ user_role.assigned_by.email }}</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if user_role.expires_at %}
+                                                <span class="text-secondary text-xs font-weight-bold">
+                                                    {{ user_role.expires_at|date:"M d, Y" }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-secondary text-xs">No expiration</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="align-middle">
+                                            {% if user_role.is_active and not user_role.is_expired %}
+                                                <a href="{% url 'rbac:revoke_role' user_role.id %}" class="btn btn-danger btn-sm" title="Revoke Role">
+                                                    <i class="material-icons text-sm">remove_circle</i>
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <div class="mb-4">
+                                <i class="material-icons text-muted" style="font-size: 4rem;">history</i>
+                            </div>
+                            <h5 class="text-muted">No Role History</h5>
+                            <p class="text-muted">This user has no role assignments in the system.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Summary Statistics -->
+            {% if user_roles %}
+            <div class="row mt-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="card bg-gradient-info">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="numbers">
+                                        <p class="text-sm mb-0 text-white">Total Assignments</p>
+                                        <h4 class="font-weight-bolder text-white">{{ user_roles.count }}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <div class="icon icon-shape bg-white shadow text-center border-radius-md">
+                                        <i class="ni ni-badge text-info text-lg opacity-10" aria-hidden="true"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card bg-gradient-success">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="numbers">
+                                        <p class="text-sm mb-0 text-white">Active Roles</p>
+                                        <h4 class="font-weight-bolder text-white">
+                                            {% for user_role in user_roles %}
+                                                {% if user_role.is_active and not user_role.is_expired %}{{ forloop.counter0|add:1 }}{% endif %}
+                                            {% endfor %}
+                                        </h4>
+                                    </div>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <div class="icon icon-shape bg-white shadow text-center border-radius-md">
+                                        <i class="ni ni-check-bold text-success text-lg opacity-10" aria-hidden="true"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card bg-gradient-warning">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="numbers">
+                                        <p class="text-sm mb-0 text-white">Expired Roles</p>
+                                        <h4 class="font-weight-bolder text-white">
+                                            {% for user_role in user_roles %}
+                                                {% if user_role.is_expired %}{{ forloop.counter0|add:1 }}{% endif %}
+                                            {% endfor %}
+                                        </h4>
+                                    </div>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <div class="icon icon-shape bg-white shadow text-center border-radius-md">
+                                        <i class="ni ni-calendar-grid-58 text-warning text-lg opacity-10" aria-hidden="true"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card bg-gradient-danger">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="numbers">
+                                        <p class="text-sm mb-0 text-white">Revoked Roles</p>
+                                        <h4 class="font-weight-bolder text-white">
+                                            {% for user_role in user_roles %}
+                                                {% if not user_role.is_active %}{{ forloop.counter0|add:1 }}{% endif %}
+                                            {% endfor %}
+                                        </h4>
+                                    </div>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <div class="icon icon-shape bg-white shadow text-center border-radius-md">
+                                        <i class="ni ni-fat-remove text-danger text-lg opacity-10" aria-hidden="true"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Back to Role Management -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="text-center">
+                        <a href="{% url 'rbac:role_management' %}" class="btn btn-outline-primary">
+                            <i class="material-icons me-2">arrow_back</i>
+                            Back to Role Management
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add any JavaScript functionality here if needed
+        console.log('User role history page loaded');
+    });
+</script>
+{% endblock %}

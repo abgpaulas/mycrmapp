@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product View - {{ product.job_order }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #007bff;
+            margin: 0;
+            font-size: 28px;
+        }
+        
+        .header h2 {
+            color: #666;
+            margin: 10px 0 0 0;
+            font-size: 18px;
+            font-weight: normal;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        
+        .section {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .section h3 {
+            color: #007bff;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        .info-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: top;
+        }
+        
+        .info-table td:first-child {
+            font-weight: bold;
+            color: #495057;
+            width: 40%;
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-approved {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .price-highlight {
+            font-weight: bold;
+            color: #28a745;
+            font-size: 16px;
+        }
+        
+        .image-section {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .product-image {
+            max-width: 100%;
+            max-height: 300px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+        }
+        
+        @media print {
+            body { margin: 0; padding: 15px; }
+            .header { page-break-after: avoid; }
+            .section { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Job Order Details</h1>
+        <h2>{{ product.job_order }} - {{ product.organization_name|default:"N/A" }}</h2>
+    </div>
+
+    <div class="content">
+        <!-- Basic Information -->
+        <div class="section">
+            <h3>Basic Information</h3>
+            <table class="info-table">
+                <tr>
+                    <td>Job Order ID:</td>
+                    <td><strong>{{ product.job_order }}</strong></td>
+                </tr>
+                <tr>
+                    <td>Submission ID:</td>
+                    <td>{{ product.submission_id|default:"N/A" }}</td>
+                </tr>
+                <tr>
+                    <td>Organization:</td>
+                    <td>{{ product.organization_name|default:"N/A" }}</td>
+                </tr>
+                <tr>
+                    <td>Job Title:</td>
+                    <td>{{ product.job_title|default:"N/A" }}</td>
+                </tr>
+                <tr>
+                    <td>Product Name:</td>
+                    <td>{{ product.print_product|default:"N/A" }}</td>
+                </tr>
+                <tr>
+                    <td>Created Date:</td>
+                    <td>{{ product.date_created|date:"F d, Y \a\t g:i A" }}</td>
+                </tr>
+                <tr>
+                    <td>Status:</td>
+                    <td>
+                        <span class="status-badge status-{{ product.approval_status }}">
+                            {{ product.get_approval_status_display }}
+                        </span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Customer Information -->
+        <div class="section">
+            <h3>Customer Information</h3>
+            <table class="info-table">
+                <tr>
+                    <td>Organization:</td>
+                    <td>{{ product.organization_name|default:"N/A" }}</td>
+                </tr>
+                <tr>
+                    <td>Address:</td>
+                    <td>{{ product.address|default:"N/A" }}</td>
+                </tr>
+                <tr>
+                    <td>Contact Number:</td>
+                    <td>{{ product.contact_number|default:"N/A" }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Product Details -->
+        <div class="section">
+            <h3>Product Details</h3>
+            <table class="info-table">
+                <tr>
+                    <td>Colors:</td>
+                    <td>{{ product.colors|default:"N/A" }}</td>
+                </tr>
+                <tr>
+                    <td>Size:</td>
+                    <td>{{ product.size|default:"N/A" }}</td>
+                </tr>
+                <tr>
+                    <td>Micron:</td>
+                    <td>{{ product.micron|default:"N/A" }}</td>
+                </tr>
+                <tr>
+                    <td>Treatment:</td>
+                    <td>{{ product.treatment|default:"N/A" }}</td>
+                </tr>
+                <tr>
+                    <td>Cutting Length:</td>
+                    <td>{{ product.cutting_length|default:"N/A" }}</td>
+                </tr>
+                <tr>
+                    <td>Flap:</td>
+                    <td>{{ product.flap|default:"N/A" }}</td>
+                </tr>
+                <tr>
+                    <td>Printing:</td>
+                    <td>{{ product.printing|default:"N/A" }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Pricing & Quantity -->
+        <div class="section">
+            <h3>Pricing & Quantity</h3>
+            <table class="info-table">
+                <tr>
+                    <td>Quantity:</td>
+                    <td>{{ product.quantity|default:"N/A" }}</td>
+                </tr>
+                <tr>
+                    <td>Order Quantity:</td>
+                    <td>{{ product.order_quantity|default:"N/A" }}</td>
+                </tr>
+                <tr>
+                    <td>Price:</td>
+                    <td class="price-highlight">{{ product.formatted_price }}</td>
+                </tr>
+                <tr>
+                    <td>Total:</td>
+                    <td class="price-highlight">{{ product.formatted_total }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Timeline -->
+        <div class="section">
+            <h3>Timeline</h3>
+            <table class="info-table">
+                <tr>
+                    <td>Created Date:</td>
+                    <td>{{ product.date_created|date:"F d, Y \a\t g:i A" }}</td>
+                </tr>
+                <tr>
+                    <td>Estimated Delivery:</td>
+                    <td>{{ product.estimated_delivery_date|date:"F d, Y"|default:"Not set" }}</td>
+                </tr>
+                <tr>
+                    <td>Actual Delivery:</td>
+                    <td>{{ product.actual_delivery_date|date:"F d, Y"|default:"Not delivered" }}</td>
+                </tr>
+                {% if product.cycle_time %}
+                <tr>
+                    <td>Cycle Time:</td>
+                    <td>{{ product.cycle_time }}</td>
+                </tr>
+                {% endif %}
+            </table>
+        </div>
+
+        <!-- Additional Information -->
+        {% if product.order_info %}
+        <div class="section">
+            <h3>Order Information</h3>
+            <p>{{ product.order_info }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Production Status -->
+        {% if product.production_status %}
+        <div class="section">
+            <h3>Production Status</h3>
+            <p>{{ product.production_status }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Product Image -->
+    {% if product.image %}
+    <div class="image-section">
+        <h3>Product Image</h3>
+        <img src="{{ product.image.url }}" alt="Product Image" class="product-image">
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        <p>Generated on {{ "now"|date:"F d, Y \a\t g:i A" }}</p>
+        <p>Job Order: {{ product.job_order }}</p>
+    </div>
+</body>
+</html>

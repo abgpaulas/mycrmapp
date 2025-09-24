@@ -1,0 +1,232 @@
+{% load rbac_tags %}
+
+<!-- Core Business Modules - Available to all authenticated users -->
+<li class="nav-item">
+  <a class="nav-link text-white {% if request.resolver_match.view_name == 'core:dashboard' %}active bg-gradient-primary{% endif %}" href="{% url 'core:dashboard' %}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="dashboard">dashboard</i>
+    </div>
+    <span class="nav-link-text ms-1">Dashboard</span>
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link text-white {% if 'invoices' in request.resolver_match.namespace and 'template' not in request.resolver_match.view_name %}active bg-gradient-primary{% endif %}" href="{% url 'invoices:list' %}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="receipt_long">receipt_long</i>
+    </div>
+    <span class="nav-link-text ms-1">Invoices</span>
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link text-white {% if 'template' in request.resolver_match.view_name %}active bg-gradient-primary{% endif %}" href="{% url 'invoices:template_list' %}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="palette">palette</i>
+    </div>
+    <span class="nav-link-text ms-1">Invoice Templates</span>
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link text-white {% if request.resolver_match.app_name == 'receipts' %}active bg-gradient-primary{% endif %}" href="{% url 'receipts:list' %}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="receipt">receipt</i>
+    </div>
+    <span class="nav-link-text ms-1">Receipts</span>
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link text-white {% if request.resolver_match.app_name == 'waybills' %}active bg-gradient-primary{% endif %}" href="{% url 'waybills:list' %}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="local_shipping">local_shipping</i>
+    </div>
+    <span class="nav-link-text ms-1">Waybills</span>
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link text-white {% if request.resolver_match.app_name == 'job_orders' %}active bg-gradient-primary{% endif %}" href="{% url 'job_orders:products' %}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="work">work</i>
+    </div>
+    <span class="nav-link-text ms-1">Job Orders</span>
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link text-white {% if request.resolver_match.app_name == 'job_orders' and request.resolver_match.url_name == 'layout_list' %}active bg-gradient-primary{% endif %}" href="{% url 'job_orders:layout_list' %}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="table_chart">table_chart</i>
+    </div>
+    <span class="nav-link-text ms-1">Job Order Layouts</span>
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link text-white {% if request.resolver_match.app_name == 'quotations' %}active bg-gradient-primary{% endif %}" href="{% url 'quotations:quotation_list' %}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="request_quote">request_quote</i>
+    </div>
+    <span class="nav-link-text ms-1">Quotations</span>
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link text-white disabled" href="#" title="Coming Soon">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="money_off">money_off</i>
+    </div>
+    <span class="nav-link-text ms-1">Expenses</span>
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link text-white {% if request.resolver_match.app_name == 'inventory' and 'template' not in request.resolver_match.view_name %}active bg-gradient-primary{% endif %}" href="{% url 'inventory:dashboard' %}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="inventory">inventory</i>
+    </div>
+    <span class="nav-link-text ms-1">Inventory</span>
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link text-white {% if 'inventory' in request.resolver_match.app_name and 'template' in request.resolver_match.view_name %}active bg-gradient-primary{% endif %}" href="{% url 'inventory:template_list' %}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="layers">layers</i>
+    </div>
+    <span class="nav-link-text ms-1">Inventory Templates</span>
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link text-white" href="{% url 'clients:client_list' %}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="people">people</i>
+    </div>
+    <span class="nav-link-text ms-1">Clients</span>
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link text-white {% if request.resolver_match.app_name == 'accounting' %}active bg-gradient-primary{% endif %}" href="{% url 'accounting:dashboard' %}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="bar_chart">bar_chart</i>
+    </div>
+    <span class="nav-link-text ms-1">Accounting</span>
+  </a>
+</li>
+
+<!-- Super Admin Section -->
+{% if user.is_superuser %}
+<li class="nav-item mt-3">
+  <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Super Admin</h6>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link text-white {% if request.resolver_match.namespace == 'company_management' %}active bg-gradient-primary{% endif %}" href="{% url 'company_management:company_list' %}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="business">business</i>
+    </div>
+    <span class="nav-link-text ms-1">Company Management</span>
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link text-white {% if request.resolver_match.view_name == 'rbac:super_admin_user_management' %}active bg-gradient-primary{% endif %}" href="{% url 'rbac:super_admin_user_management' %}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="people">people</i>
+    </div>
+    <span class="nav-link-text ms-1">User Management</span>
+  </a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link text-white" href="/admin/" target="_blank">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="admin_panel_settings">admin_panel_settings</i>
+    </div>
+    <span class="nav-link-text ms-1">Django Admin</span>
+  </a>
+</li>
+{% endif %}
+
+<!-- Role-Based Features Section -->
+{% has_role 'company_admin' as is_company_admin %}
+{% if is_company_admin %}
+<li class="nav-item mt-3">
+  <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Administration</h6>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link text-white {% if request.resolver_match.app_name == 'rbac' %}active bg-gradient-primary{% endif %}" href="{% url 'rbac:role_management' %}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="admin_panel_settings">admin_panel_settings</i>
+    </div>
+    <span class="nav-link-text ms-1">Role Management</span>
+  </a>
+</li>
+{% endif %}
+
+<!-- Viewer Role Information -->
+{% has_role 'viewer' as is_viewer %}
+{% if is_viewer %}
+<li class="nav-item mt-3">
+  <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Viewer Access</h6>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link text-white" href="{% url 'rbac:my_permissions' %}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="visibility">visibility</i>
+    </div>
+    <span class="nav-link-text ms-1">My Permissions</span>
+  </a>
+</li>
+{% endif %}
+
+<!-- Account Section -->
+<li class="nav-item mt-3">
+  <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Account</h6>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link text-white {% if request.resolver_match.app_name == 'accounts' and request.resolver_match.url_name == 'profile' %}active bg-gradient-primary{% endif %}" href="{% url 'accounts:profile' %}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="person">person</i>
+    </div>
+    <span class="nav-link-text ms-1">My Profile</span>
+  </a>
+</li>
+
+
+<!-- My Permissions Link -->
+<li class="nav-item">
+  <a class="nav-link text-white {% if request.resolver_match.url_name == 'my_permissions' %}active bg-gradient-primary{% endif %}" href="{% url 'rbac:my_permissions' %}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="security">security</i>
+    </div>
+    <span class="nav-link-text ms-1">My Permissions</span>
+  </a>
+</li>
+
+<!-- Company Profile Link -->
+<li class="nav-item">
+  <a class="nav-link text-white {% if request.resolver_match.url_name == 'company_profile' %}active bg-gradient-primary{% endif %}" href="{% url 'core:company_profile' %}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="business">business</i>
+    </div>
+    <span class="nav-link-text ms-1">Company Profile</span>
+  </a>
+</li>
+
+<!-- Logout -->
+<li class="nav-item">
+  <a class="nav-link text-white" href="{% url 'auth:logout' %}">
+    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+      <i class="material-icons opacity-10" data-icon="logout">logout</i>
+    </div>
+    <span class="nav-link-text ms-1">Logout</span>
+  </a>
+</li>
