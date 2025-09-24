@@ -5,7 +5,7 @@ services:
   - type: web
     name: mycrmapp
     env: python
-    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput"
+    buildCommand: "pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py collectstatic --noinput"
     startCommand: "python start_app.py"
     envVars:
       - key: SECRET_KEY
