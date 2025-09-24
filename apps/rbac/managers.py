@@ -11,7 +11,8 @@ class RoleManager:
     @staticmethod
     def create_default_roles():
         """Create default roles with their permissions"""
-        roles_data = [
+        try:
+            roles_data = [
             {
                 'name': 'Super Admin',
                 'role_type': 'super_admin',
@@ -135,38 +136,51 @@ class RoleManager:
         
         created_roles = []
         for role_data in roles_data:
-            role, created = Role.objects.get_or_create(
-                role_type=role_data['role_type'],
-                defaults={
-                    'name': role_data['name'],
-                    'description': role_data['description']
-                }
-            )
-            if created:
-                # Add permissions to the role
-                permissions = role_data['permissions']
-                if permissions == ['*']:  # Super admin gets all permissions
-                    role.permissions.set(Permission.objects.all())
-                else:
-                    role_permissions = []
-                    for perm in permissions:
-                        if perm.endswith('.*'):  # Wildcard permission
-                            app_label = perm.replace('.*', '')
-                            role_permissions.extend(
-                                Permission.objects.filter(content_type__app_label=app_label)
-                            )
-                        else:
-                            try:
-                                app_label, codename = perm.split('.')
-                                role_permissions.append(
-                                    Permission.objects.get(content_type__app_label=app_label, codename=codename)
+            try:
+                role, created = Role.objects.get_or_create(
+                    role_type=role_data['role_type'],
+                    defaults={
+                        'name': role_data['name'],
+                        'description': role_data['description']
+                    }
+                )
+                if created:
+                    # Add permissions to the role
+                    permissions = role_data['permissions']
+                    if permissions == ['*']:  # Super admin gets all permissions
+                        role.permissions.set(Permission.objects.all())
+                    else:
+                        role_permissions = []
+                        for perm in permissions:
+                            if perm.endswith('.*'):  # Wildcard permission
+                                app_label = perm.replace('.*', '')
+                                role_permissions.extend(
+                                    Permission.objects.filter(content_type__app_label=app_label)
                                 )
-                            except (ValueError, Permission.DoesNotExist):
-                                continue
-                    role.permissions.set(role_permissions)
-            created_roles.append(role)
+                            else:
+                                try:
+                                    app_label, codename = perm.split('.')
+                                    role_permissions.append(
+                                        Permission.objects.get(content_type__app_label=app_label, codename=codename)
+                                    )
+                                except (ValueError, Permission.DoesNotExist):
+                                    continue
+                        role.permissions.set(role_permissions)
+                created_roles.append(role)
+            except Exception as e:
+                # Log individual role creation errors but continue
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Error creating role {role_data.get('name', 'Unknown')}: {e}")
+                continue
         
         return created_roles
+        except Exception as e:
+            # Log the overall error and return empty list
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error in create_default_roles: {e}")
+            return []
 
 
 class UserRoleManager:
