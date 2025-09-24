@@ -1,6 +1,6 @@
-# Updated: 2025-09-23 - Using SQLite database for simplicity
+# Updated: 2025-09-23 - Using PostgreSQL database for production stability
 # FORCE DEPLOYMENT: This comment forces Render to use the latest commit
-# VERSION: 2.0 - Database setup script included
+# VERSION: 3.0 - PostgreSQL database configuration
 services:
   - type: web
     name: mycrmapp
@@ -16,5 +16,17 @@ services:
         value: "False"
       - key: PYTHON_VERSION
         value: "3.11.0"
+      - key: RENDER
+        value: "True"
+      - fromDatabase:
+          type: postgresql
+          name: mycrmapp-db
+          property: connectionString
+          key: DATABASE_URL
     healthCheckPath: "/dashboard/landing/"
+    plan: free
+
+  - type: pserv
+    name: mycrmapp-db
+    env: postgresql
     plan: free

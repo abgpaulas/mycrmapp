@@ -31,6 +31,13 @@ if RAILWAY_PUBLIC_DOMAIN:
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
+# Add Render default domains
+if config('RENDER', default=False, cast=bool):
+    ALLOWED_HOSTS.extend([
+        'mycrmapp.onrender.com',
+        '*.onrender.com',
+    ])
+
 # Allow all hosts in debug mode
 if DEBUG:
     ALLOWED_HOSTS.append('*')
@@ -111,17 +118,35 @@ TEMPLATES = [
 WSGI_APPLICATION = 'business_app.wsgi.application'
 
 # Database
-# Use PostgreSQL on Railway, SQLite for local development
-if config('DATABASE_URL', default=''):
+# Use PostgreSQL on Railway/Render, SQLite for local development
+DATABASE_URL = config('DATABASE_URL', default='')
+
+if DATABASE_URL:
+    # Production database (Railway/Render)
     import dj_database_url
     DATABASES = {
-        'default': dj_database_url.parse(config('DATABASE_URL'))
+        'default': dj_database_url.parse(DATABASE_URL)
     }
 else:
+    # Development database (SQLite)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
+# Render-specific database configuration
+if config('RENDER', default=False, cast=bool):
+    # Force PostgreSQL for Render even if DATABASE_URL is not set
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('PGDATABASE', default='railway'),
+            'USER': config('PGUSER', default='postgres'),
+            'PASSWORD': config('PGPASSWORD', default=''),
+            'HOST': config('PGHOST', default='localhost'),
+            'PORT': config('PGPORT', default='5432'),
         }
     }
 
