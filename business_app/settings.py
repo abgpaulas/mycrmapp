@@ -14,8 +14,8 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-your-secret-key-here'
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 # Temporarily enable debug mode for Render to see error details (disabled after fixes)
-if config('RENDER', default=False, cast=bool):
-    DEBUG = True
+# if config('RENDER', default=False, cast=bool):
+#     DEBUG = True
 
 DEBUG_INVENTORY = config('DEBUG_INVENTORY', default=True, cast=bool)
 
@@ -127,36 +127,16 @@ WSGI_APPLICATION = 'business_app.wsgi.application'
 
 # Try to get DATABASE_URL from environment
 DATABASE_URL = config('DATABASE_URL', default='')
-RENDER_MODE = config('RENDER', default=False, cast=bool)
 
-# Force PostgreSQL for Render deployment
-if RENDER_MODE:
-    if DATABASE_URL:
-        # Use DATABASE_URL from Render environment
-        import dj_database_url
-        DATABASES = {
-            'default': dj_database_url.parse(DATABASE_URL)
-        }
-    else:
-        # Use individual PostgreSQL environment variables for Render
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': config('PGDATABASE', default='mycrmapp'),
-                'USER': config('PGUSER', default='mycrmapp_user'),
-                'PASSWORD': config('PGPASSWORD', default=''),
-                'HOST': config('PGHOST', default='dpg-d39actggjchc73dk1r8g-a'),
-                'PORT': config('PGPORT', default='5432'),
-            }
-        }
-elif DATABASE_URL:
-    # Production database (Railway/Render) - when not using RENDER env var
+# Always use DATABASE_URL if available (for production deployments)
+if DATABASE_URL:
+    # Use DATABASE_URL from environment (Render/Railway/etc.)
     import dj_database_url
     DATABASES = {
         'default': dj_database_url.parse(DATABASE_URL)
     }
 else:
-    # Development database (SQLite)
+    # Development database (SQLite) - only when DATABASE_URL is not set
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
