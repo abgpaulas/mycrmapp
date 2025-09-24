@@ -126,8 +126,28 @@ WSGI_APPLICATION = 'business_app.wsgi.application'
 # Use PostgreSQL on Railway/Render, SQLite for local development
 DATABASE_URL = config('DATABASE_URL', default='')
 
-if DATABASE_URL:
-    # Production database (Railway/Render)
+# Render-specific database configuration - prioritize DATABASE_URL
+if config('RENDER', default=False, cast=bool):
+    if DATABASE_URL:
+        # Use DATABASE_URL from Render environment
+        import dj_database_url
+        DATABASES = {
+            'default': dj_database_url.parse(DATABASE_URL)
+        }
+    else:
+        # Fallback to individual PostgreSQL config for Render
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': config('PGDATABASE', default='railway'),
+                'USER': config('PGUSER', default='postgres'),
+                'PASSWORD': config('PGPASSWORD', default=''),
+                'HOST': config('PGHOST', default='localhost'),
+                'PORT': config('PGPORT', default='5432'),
+            }
+        }
+elif DATABASE_URL:
+    # Production database (Railway/Render) - when not using RENDER env var
     import dj_database_url
     DATABASES = {
         'default': dj_database_url.parse(DATABASE_URL)
@@ -138,20 +158,6 @@ else:
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
-
-# Render-specific database configuration
-if config('RENDER', default=False, cast=bool):
-    # Force PostgreSQL for Render even if DATABASE_URL is not set
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': config('PGDATABASE', default='railway'),
-            'USER': config('PGUSER', default='postgres'),
-            'PASSWORD': config('PGPASSWORD', default=''),
-            'HOST': config('PGHOST', default='localhost'),
-            'PORT': config('PGPORT', default='5432'),
         }
     }
 
